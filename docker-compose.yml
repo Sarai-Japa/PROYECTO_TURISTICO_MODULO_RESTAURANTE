@@ -1,0 +1,67 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: restaurante_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:4000}
+    depends_on:
+      - backend
+    networks:
+      - restaurante_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: restaurante_backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+    environment:
+      - PORT=${PORT:-4000}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/restaurante_db}
+      - JWT_SECRET=${JWT_SECRET:-dev_secret_change_in_prod}
+      - NODE_ENV=development
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - restaurante_network
+
+  db:
+    image: postgres:16-alpine
+    container_name: restaurante_db
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-restaurante_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - restaurante_network
+
+volumes:
+  postgres_data:
+  frontend_node_modules:
+  backend_node_modules:
+
+networks:
+  restaurante_network:
+    driver: bridge

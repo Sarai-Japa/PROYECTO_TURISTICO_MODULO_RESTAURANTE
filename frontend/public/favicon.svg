@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Fondo circular naranja -->
+  <circle cx="16" cy="16" r="16" fill="#f97316"/>
+  <!-- Chef hat simplificado en blanco -->
+  <!-- Base del gorro -->
+  <rect x="9" y="19" width="14" height="4" rx="1" fill="white"/>
+  <!-- Cuerpo del gorro -->
+  <path d="M11 19 C11 19 10 12 16 12 C22 12 21 19 21 19 Z" fill="white"/>
+  <!-- Pompón superior -->
+  <circle cx="16" cy="10.5" r="3.5" fill="white"/>
+  <!-- Ala izquierda -->
+  <ellipse cx="11" cy="14.5" rx="2.5" ry="3" fill="white"/>
+  <!-- Ala derecha -->
+  <ellipse cx="21" cy="14.5" rx="2.5" ry="3" fill="white"/>
+</svg>

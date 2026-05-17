@@ -1,0 +1,25 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE restaurantes (
+  id           SERIAL PRIMARY KEY,
+  nombre       VARCHAR(200) NOT NULL,
+  tipo_comida  VARCHAR(100),
+  categoria    VARCHAR(100),
+  descripcion  TEXT,
+  direccion    VARCHAR(300),
+  ciudad       VARCHAR(100),
+  imagen_url   TEXT,
+  calificacion DECIMAL(3,1) DEFAULT 0
+               CONSTRAINT chk_calificacion CHECK (calificacion >= 0 AND calificacion <= 5),
+  created_at   TIMESTAMP DEFAULT NOW()
+);
+
+-- T07 (HU01): índice GIN combinado para búsqueda full-text
+CREATE INDEX idx_restaurantes_fts ON restaurantes
+  USING gin(
+    to_tsvector('spanish',
+      nombre || ' ' ||
+      COALESCE(tipo_comida, '') || ' ' ||
+      COALESCE(categoria, '')
+    )
+  );
