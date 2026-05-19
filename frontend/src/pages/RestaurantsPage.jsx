@@ -22,7 +22,7 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant }) {
     <>
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <button onClick={onBack} className="flex items-center gap-2 hover:opacity-80 transition">
+          <button onClick={onBack} className="flex items-center gap-2 hover:opacity-80 transition cursor-pointer">
             <ChefHat className="w-8 h-8 text-orange-500" />
             <span className="text-2xl font-bold text-gray-900">FoodHub</span>
           </button>

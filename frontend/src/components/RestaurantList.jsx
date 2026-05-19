@@ -15,14 +15,14 @@ function Pagination({ page, totalPages, onChange }) {
       <button
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
-        className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-200 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+        className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-200 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
       >
         ← Anterior
       </button>
 
       {start > 1 && (
         <>
-          <button onClick={() => onChange(1)} className="px-3 py-2 rounded-lg text-sm bg-white border border-gray-200 hover:bg-orange-50 transition">1</button>
+          <button onClick={() => onChange(1)} className="px-3 py-2 rounded-lg text-sm bg-white border border-gray-200 hover:bg-orange-50 transition cursor-pointer">1</button>
           {start > 2 && <span className="px-1 text-gray-400">…</span>}
         </>
       )}
@@ -31,7 +31,7 @@ function Pagination({ page, totalPages, onChange }) {
         <button
           key={p}
           onClick={() => onChange(p)}
-          className={`px-3 py-2 rounded-lg text-sm font-medium border transition ${
+          className={`px-3 py-2 rounded-lg text-sm font-medium border transition cursor-pointer ${
             p === page
               ? 'bg-orange-500 text-white border-orange-500'
               : 'bg-white border-gray-200 hover:bg-orange-50'
@@ -44,14 +44,14 @@ function Pagination({ page, totalPages, onChange }) {
       {end < totalPages && (
         <>
           {end < totalPages - 1 && <span className="px-1 text-gray-400">…</span>}
-          <button onClick={() => onChange(totalPages)} className="px-3 py-2 rounded-lg text-sm bg-white border border-gray-200 hover:bg-orange-50 transition">{totalPages}</button>
+          <button onClick={() => onChange(totalPages)} className="px-3 py-2 rounded-lg text-sm bg-white border border-gray-200 hover:bg-orange-50 transition cursor-pointer">{totalPages}</button>
         </>
       )}
 
       <button
         disabled={page >= totalPages}
         onClick={() => onChange(page + 1)}
-        className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-200 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+        className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-200 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
       >
         Siguiente →
       </button>
@@ -59,16 +59,32 @@ function Pagination({ page, totalPages, onChange }) {
   );
 }
 
+const SIZE_OPTIONS = [10, 20, 50, 100, 200];
+
 // T01 + T02: lista paginada de restaurantes con skeleton de carga
 export default function RestaurantList({ onSelect }) {
   const [page, setPage] = useState(1);
-  const { restaurants, meta, loading, error } = useRestaurants(page, 20);
+  const [size, setSize] = useState(20);
+  const { restaurants, meta, loading, error } = useRestaurants(page, size);
+
+  function handleSizeChange(newSize) {
+    setSize(newSize);
+    setPage(1);
+  }
+
+  const skeletonCount = Math.min(size, 12);
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
-      </div>
+      <>
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-5 w-40 bg-gray-200 rounded animate-pulse" />
+          <SizeSelector size={size} onChange={handleSizeChange} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: skeletonCount }).map((_, i) => <CardSkeleton key={i} />)}
+        </div>
+      </>
     );
   }
 
@@ -90,9 +106,12 @@ export default function RestaurantList({ onSelect }) {
 
   return (
     <div>
-      <p className="text-gray-600 mb-4">
-        {meta.total} restaurante{meta.total !== 1 ? 's' : ''} disponible{meta.total !== 1 ? 's' : ''}
-      </p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-gray-600">
+          {meta.total} restaurante{meta.total !== 1 ? 's' : ''} disponible{meta.total !== 1 ? 's' : ''}
+        </p>
+        <SizeSelector size={size} onChange={handleSizeChange} />
+      </div>
 
       {/* T01: grilla responsive — 1 col móvil / 2 col tablet / 3 col desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -105,6 +124,23 @@ export default function RestaurantList({ onSelect }) {
       {meta.totalPages > 1 && (
         <Pagination page={meta.page} totalPages={meta.totalPages} onChange={setPage} />
       )}
+    </div>
+  );
+}
+
+function SizeSelector({ size, onChange }) {
+  return (
+    <div className="flex items-center gap-2 text-sm text-gray-600">
+      <span>Mostrar:</span>
+      <select
+        value={size}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-orange-500 cursor-pointer transition"
+      >
+        {SIZE_OPTIONS.map((n) => (
+          <option key={n} value={n}>{n}</option>
+        ))}
+      </select>
     </div>
   );
 }

@@ -3,9 +3,23 @@ import HomePage from './pages/HomePage';
 import RestaurantsPage from './pages/RestaurantsPage';
 import RestaurantDetailPage from './pages/RestaurantDetailPage';
 
+function getInitialPage() {
+  return window.location.hash === '#restaurantes' ? 'restaurants' : 'home';
+}
+
 export default function App() {
-  const [page, setPage]                         = useState('home');
+  const [page, setPage]                             = useState(getInitialPage);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+
+  function goToRestaurants() {
+    window.location.hash = '#restaurantes';
+    setPage('restaurants');
+  }
+
+  function goToHome() {
+    window.location.hash = '';
+    setPage('home');
+  }
 
   if (selectedRestaurant) {
     return (
@@ -19,11 +33,11 @@ export default function App() {
   if (page === 'restaurants') {
     return (
       <RestaurantsPage
-        onBack={() => setPage('home')}
+        onBack={goToHome}
         onSelectRestaurant={setSelectedRestaurant}
       />
     );
   }
 
-  return <HomePage onExplore={() => setPage('restaurants')} />;
+  return <HomePage onExplore={goToRestaurants} />;
 }

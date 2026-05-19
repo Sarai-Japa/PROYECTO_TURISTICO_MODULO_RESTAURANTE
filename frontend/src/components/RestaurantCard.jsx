@@ -70,7 +70,7 @@ export default function RestaurantCard({ restaurant, onClick }) {
       </div>
 
       <div className="px-4 pb-4">
-        <button className="w-full py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium text-sm">
+        <button className="w-full py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium text-sm cursor-pointer">
           Ver Detalle →
         </button>
       </div>
