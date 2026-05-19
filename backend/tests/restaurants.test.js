@@ -119,3 +119,36 @@ describe('T07 — Comportamiento con datos faltantes', () => {
     expect(res.body.meta.total).toBe(0);
   });
 });
+
+// ══════════════════════════════════════════════════════════════════
+// QA — Detalle de restaurante (PTMA-113)
+// ══════════════════════════════════════════════════════════════════
+describe('QA — Detalle de restaurante (existente, inexistente, inválido)', () => {
+
+  test('GET /api/restaurants/:id existente → retorna 200 y los detalles', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [mockCompleto] });
+    const res = await request(app).get('/api/restaurants/1');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      id: 1,
+      nombre: 'Pizzería Roma',
+    });
+  });
+
+  test('GET /api/restaurants/:id inexistente → retorna 404', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    const res = await request(app).get('/api/restaurants/999');
+
+    expect(res.status).toBe(404);
+    expect(res.body).toHaveProperty('error', 'Restaurante no encontrado');
+  });
+
+  test('GET /api/restaurants/:id inválido → retorna 400', async () => {
+    const res = await request(app).get('/api/restaurants/abc');
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error', 'ID de restaurante inválido');
+  });
+});
+

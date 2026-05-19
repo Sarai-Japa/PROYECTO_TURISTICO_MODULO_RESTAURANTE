@@ -9,3 +9,14 @@ INSERT INTO restaurantes (nombre, tipo_comida, categoria, descripcion, direccion
   ('Wok Garden',          'China',      'Wok',          'Salteados y dim sum tradicional',             'Jr. Dragón 55',        'San Juan',      'https://images.pexels.com/photos/1410235/pexels-photo-1410235.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',  4.4),
   ('Pizzería Roma',       'Italiana',   'Pizza',        'Pizzas artesanales al horno de leña',         'Jr. Coliseo 78',       'Jesús María',   'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',   4.1),
   ('Mariscos del Puerto', 'Marina',     'Mariscos',     'Mariscos frescos y ceviches del mar',         'Av. Costanera 5',      'Magdalena',     'https://images.pexels.com/photos/3296279/pexels-photo-3296279.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',  4.6);
+
+INSERT INTO reseñas (restaurante_id, usuario_nombre, puntuacion, comentario, fecha_creacion) VALUES
+  (1, 'Carlos Mendoza', 5, 'Excelente ceviche, super recomendado.', '2026-05-18 10:00:00'),
+  (1, 'Ana Portal', 4, 'Muy rico pero demoró un poco en llegar.', '2026-05-19 11:00:00'),
+  (1, 'Roberto Gómez', 5, 'El mejor pollo a la brasa que he probado en años.', '2026-05-15 15:30:00'),
+  (2, 'Laura Rojas', 5, 'La pasta carbonara es espectacular. Gran servicio.', '2026-05-19 09:00:00'),
+  (2, 'Miguel Ángel', 3, 'El ambiente es lindo pero la lasaña estaba un poco fría.', '2026-05-17 12:00:00'),
+  (2, 'Sofía Delgado', 4, 'Buena carta de vinos y pastas hechas a mano.', '2026-05-18 20:45:00'),
+  (3, 'Pedro Fuentes', 5, 'El café Aroma de especialidad es el mejor de la zona.', '2026-05-19 07:30:00'),
+  (3, 'Elena Paz', 5, 'Los postres caseros son deliciosos. Volveré.', '2026-05-16 16:00:00');
+

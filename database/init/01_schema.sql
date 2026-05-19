@@ -23,3 +23,15 @@ CREATE INDEX idx_restaurantes_fts ON restaurantes
       COALESCE(categoria, '')
     )
   );
+
+CREATE TABLE reseñas (
+  id             SERIAL PRIMARY KEY,
+  restaurante_id INT NOT NULL REFERENCES restaurantes(id) ON DELETE CASCADE,
+  usuario_nombre VARCHAR(150) NOT NULL,
+  puntuacion     INT NOT NULL CONSTRAINT chk_puntuacion CHECK (puntuacion >= 1 AND puntuacion <= 5),
+  comentario     TEXT,
+  fecha_creacion TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_reseñas_restaurante_id ON reseñas(restaurante_id);
+

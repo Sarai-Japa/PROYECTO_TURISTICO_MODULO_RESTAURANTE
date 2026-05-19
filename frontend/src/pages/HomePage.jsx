@@ -85,8 +85,8 @@ export default function HomePage({ onExplore }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {FEATURE_CARDS.map(({ icon: Icon, title, desc, img }) => (
               <div key={title} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition group">
-                <div className="relative h-40 overflow-hidden">
-                  <img src={img} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                <div className="relative h-40 overflow-hidden bg-gray-100">
+                  <img src={img} alt={title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
                   <div className="absolute bottom-3 left-3 bg-orange-500 rounded-full p-2 shadow">
                     <Icon className="w-5 h-5 text-white" />
@@ -110,8 +110,8 @@ export default function HomePage({ onExplore }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {SHOWCASE.map((r) => (
               <button key={r.name} onClick={onExplore} className="rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition group cursor-pointer block w-full text-left">
-                <div className="relative h-52 overflow-hidden">
-                  <img src={r.img} alt={r.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                <div className="relative h-52 overflow-hidden bg-gray-100">
+                  <img src={r.img} alt={r.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <p className="text-white font-bold text-lg leading-tight">{r.name}</p>
@@ -138,10 +138,11 @@ export default function HomePage({ onExplore }) {
       {/* CTA */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="relative rounded-3xl overflow-hidden">
+          <div className="relative rounded-3xl overflow-hidden bg-gray-100">
             <img
               src="https://images.pexels.com/photos/784633/pexels-photo-784633.jpeg?auto=compress&cs=tinysrgb&w=1400&h=500&fit=crop"
               alt="Mesa de restaurante"
+              loading="lazy"
               className="w-full h-64 object-cover"
             />
             <div className="absolute inset-0 bg-orange-600/80" />

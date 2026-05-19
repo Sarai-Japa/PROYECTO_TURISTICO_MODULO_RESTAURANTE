@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { MapPin } from 'lucide-react';
 
 const DEFAULT_IMG = 'https://images.pexels.com/photos/67468/pexels-photo-67468.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop';
@@ -23,6 +24,7 @@ function Stars({ value }) {
 // T01: tarjeta de restaurante — imagen, nombre, calificación (estrellas), ubicación
 export default function RestaurantCard({ restaurant, onClick }) {
   const { nombre, imagen_url, calificacion, ciudad, tipo_comida } = restaurant;
+  const [loaded, setLoaded] = useState(false);
 
   return (
     <div
@@ -34,8 +36,13 @@ export default function RestaurantCard({ restaurant, onClick }) {
         <img
           src={imagen_url || DEFAULT_IMG}
           alt={nombre}
-          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-          onError={(e) => { e.currentTarget.src = DEFAULT_IMG; }}
+          loading="lazy"
+          onLoad={() => setLoaded(true)}
+          className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ease-out ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          onError={(e) => { 
+            e.currentTarget.src = DEFAULT_IMG;
+            setLoaded(true); 
+          }}
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
       </div>
