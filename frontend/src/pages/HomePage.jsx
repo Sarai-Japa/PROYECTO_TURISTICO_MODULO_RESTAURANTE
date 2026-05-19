@@ -46,7 +46,7 @@ export default function HomePage({ onExplore }) {
           </div>
           <button
             onClick={onExplore}
-            className="px-6 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition"
+            className="px-6 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition cursor-pointer"
           >
             Explorar
           </button>
@@ -70,7 +70,7 @@ export default function HomePage({ onExplore }) {
           </p>
           <button
             onClick={onExplore}
-            className="inline-block px-10 py-4 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition text-lg shadow-lg"
+            className="inline-block px-10 py-4 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition text-lg shadow-lg cursor-pointer"
           >
             Comenzar a Explorar →
           </button>
@@ -127,7 +127,7 @@ export default function HomePage({ onExplore }) {
           <div className="text-center mt-10">
             <button
               onClick={onExplore}
-              className="inline-block px-8 py-3 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition shadow"
+              className="inline-block px-8 py-3 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition shadow cursor-pointer"
             >
               Ver todos los restaurantes →
             </button>
@@ -150,7 +150,7 @@ export default function HomePage({ onExplore }) {
               <p className="text-white/90 text-lg mb-6">Cientos de restaurantes con información detallada, reseñas y más</p>
               <button
                 onClick={onExplore}
-                className="px-8 py-3 bg-white text-orange-600 rounded-xl font-bold hover:bg-gray-100 transition shadow"
+                className="px-8 py-3 bg-white text-orange-600 rounded-xl font-bold hover:bg-gray-100 transition shadow cursor-pointer"
               >
                 Ir a Restaurantes
               </button>

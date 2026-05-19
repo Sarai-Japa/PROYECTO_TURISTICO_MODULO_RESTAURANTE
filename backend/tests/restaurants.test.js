@@ -64,11 +64,11 @@ describe('T05 — API devuelve campos mínimos', () => {
     expect(res.body.meta.totalPages).toBe(5);
   });
 
-  test('size máximo permitido es 50 (no acepta size=200)', async () => {
-    mockQuery(Array(50).fill(mockCompleto), 200);
-    const res = await request(app).get('/api/restaurants?size=200');
+  test('size máximo permitido es 200 (no acepta size=500)', async () => {
+    mockQuery(Array(200).fill(mockCompleto), 500);
+    const res = await request(app).get('/api/restaurants?size=500');
 
-    expect(res.body.meta.size).toBe(50);
+    expect(res.body.meta.size).toBe(200);
   });
 });
 

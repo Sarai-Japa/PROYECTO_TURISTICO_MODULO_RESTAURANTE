@@ -72,7 +72,7 @@ export default function SearchBar({ onSearch }) {
             <button
               type="button"
               onClick={() => { handleChange({ target: { value: '' } }); setOpen(false); onSearch([], ''); }}
-              className="absolute right-4 text-gray-400 hover:text-gray-600 transition"
+              className="absolute right-4 text-gray-400 hover:text-gray-600 transition cursor-pointer"
               aria-label="Limpiar búsqueda"
             >
               <X className="w-4 h-4" />
@@ -104,7 +104,7 @@ export default function SearchBar({ onSearch }) {
                   <li key={item.id}>
                     <button
                       onMouseDown={() => handleSelect(item)}
-                      className="w-full text-left px-4 py-3 hover:bg-orange-50 flex items-center justify-between gap-3 border-b border-gray-100 last:border-0 transition"
+                      className="w-full text-left px-4 py-3 hover:bg-orange-50 flex items-center justify-between gap-3 border-b border-gray-100 last:border-0 transition cursor-pointer"
                     >
                       <div className="min-w-0">
                         {/* T03: resaltar coincidencias */}
