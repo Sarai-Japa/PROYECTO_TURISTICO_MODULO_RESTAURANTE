@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, MapPin } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Clock, Globe } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import { useReviews } from '../hooks/useReviews';
+
+// Fix Leaflet default marker icons with bundlers
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 const DEFAULT_IMG = 'https://images.pexels.com/photos/67468/pexels-photo-67468.jpeg?auto=compress&cs=tinysrgb&w=1200&h=500&fit=crop';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -9,109 +20,306 @@ function Stars({ value }) {
   const rating = parseFloat(value) || 0;
   return (
     <div className="flex items-center gap-1">
-      <span className="text-2xl text-yellow-400">
+      <span className="text-xl text-yellow-400">
         {'★'.repeat(Math.round(rating))}{'☆'.repeat(5 - Math.round(rating))}
       </span>
-      <span className="text-xl font-bold text-gray-700 ml-1">
+      <span className="text-lg font-bold text-gray-700 ml-1">
         {rating > 0 ? `${rating.toFixed(1)}/5` : 'Sin puntuación'}
       </span>
     </div>
   );
 }
 
-function getMockMenu(tipoComida) {
-  const defaultMenu = [
-    { nombre: 'Plato Especial de la Casa', desc: 'Nuestra recomendación especial elaborada con los ingredientes más frescos del día.', precio: 'S/. 32.00' },
-    { nombre: 'Bebida Refrescante Artesanal', desc: 'Infusión fría de frutas de la estación y hierbas aromáticas.', precio: 'S/. 8.50' },
-    { nombre: 'Postre Delicia Tradicional', desc: 'Receta secreta familiar servida con una bola de helado artesanal.', precio: 'S/. 12.00' }
-  ];
+const MENU = {
+  peruana: [
+    { nombre: 'Ceviche Clásico Peruano', desc: 'Pescado fresco marinado en jugo de limón, ají limo, camote y choclo.', precio: 'S/. 35.00' },
+    { nombre: 'Lomo Saltado Criollo', desc: 'Lomo fino salteado al wok con cebolla, tomate, ají amarillo, papas fritas y arroz.', precio: 'S/. 42.00' },
+    { nombre: 'Ají de Gallina', desc: 'Pechuga de gallina en salsa cremosa de ají amarillo, nueces y queso parmesano.', precio: 'S/. 32.00' },
+    { nombre: 'Chicha Morada de la Casa', desc: 'Bebida tradicional a base de maíz morado hervido con piña y especias.', precio: 'S/. 9.00' },
+  ],
+  italiana: [
+    { nombre: 'Fettuccine Alfredo con Pollo', desc: 'Pasta fresca en salsa Alfredo tradicional con queso parmesano.', precio: 'S/. 36.00' },
+    { nombre: 'Lasaña Boloñesa Rústica', desc: 'Capas de pasta rellenas de salsa boloñesa artesanal y mozzarella gratinada.', precio: 'S/. 38.00' },
+    { nombre: 'Pizza Margherita', desc: 'Tomate San Marzano, mozzarella fresca y albahaca sobre masa artesanal.', precio: 'S/. 34.00' },
+    { nombre: 'Tiramisú de Especialidad', desc: 'Bizcochuelo en café espresso italiano con crema de mascarpone.', precio: 'S/. 15.00' },
+  ],
+  japonesa: [
+    { nombre: 'Maki Acevichado (10 cortes)', desc: 'Roll de langostino empanizado y palta cubierto de atún y salsa acevichada.', precio: 'S/. 28.00' },
+    { nombre: 'Ramen Tonkotsu', desc: 'Caldo espeso de cerdo 12 horas, fideos caseros, chashu, huevo marinado.', precio: 'S/. 34.00' },
+    { nombre: 'Sashimi Mixto', desc: 'Selección del día de atún, salmón y pez blanco cortados al instante.', precio: 'S/. 45.00' },
+    { nombre: 'Mochi de Té Verde', desc: 'Dulce japonés relleno de helado premium sabor matcha.', precio: 'S/. 10.00' },
+  ],
+  default: [
+    { nombre: 'Plato Especial de la Casa', desc: 'Nuestra recomendación elaborada con los ingredientes más frescos del día.', precio: 'S/. 32.00' },
+    { nombre: 'Entrada de Temporada', desc: 'Selección de entradas preparadas con productos locales de estación.', precio: 'S/. 18.00' },
+    { nombre: 'Bebida Artesanal', desc: 'Infusión fría de frutas de la estación y hierbas aromáticas.', precio: 'S/. 8.50' },
+    { nombre: 'Postre Tradicional', desc: 'Receta secreta familiar servida con helado artesanal.', precio: 'S/. 12.00' },
+  ],
+};
 
-  const peruanoMenu = [
-    { nombre: 'Ceviche Clásico Peruano', desc: 'Trozos de pescado fresco marinados en jugo de limón, ají limo, servido con camote y choclo.', precio: 'S/. 35.00' },
-    { nombre: 'Lomo Saltado Criollo', desc: 'Jugosos trozos de lomo fino salteados al wok con cebolla, tomate, ají amarillo, servido con papas fritas y arroz.', precio: 'S/. 42.00' },
-    { nombre: 'Chicha Morada de la Casa', desc: 'Bebida tradicional a base de maíz morado hervido con piña, manzana y especias.', precio: 'S/. 9.00' }
-  ];
-
-  const italianoMenu = [
-    { nombre: 'Fettuccine Alfredo con Pollo', desc: 'Pasta fresca hecha a mano bañada en una cremosa salsa Alfredo tradicional con queso parmesano.', precio: 'S/. 36.00' },
-    { nombre: 'Lasaña Boloñesa Rústica', desc: 'Capas de pasta rellenas de salsa boloñesa artesanal, bechamel y abundante queso mozzarella gratinado.', precio: 'S/. 38.00' },
-    { nombre: 'Tiramisú de Especialidad', desc: 'Bizcochuelo bañado en café espresso italiano, licor de café y crema de mascarpone.', precio: 'S/. 15.00' }
-  ];
-
-  const japonesMenu = [
-    { nombre: 'Maki Acevichado (10 cortes)', desc: 'Roll de langostino empanizado y palta, cubierto de láminas de atún y bañado en salsa acevichada.', precio: 'S/. 28.00' },
-    { nombre: 'Ramen Tonkotsu Tradicional', desc: 'Caldo espeso de cerdo cocido por 12 horas, fideos ramen caseros, chashu, huevo marinado y cebollita china.', precio: 'S/. 34.00' },
-    { nombre: 'Mochi helado de Té Verde', desc: 'Delicioso dulce japonés relleno de helado premium sabor matcha.', precio: 'S/. 10.00' }
-  ];
-
-  const tipo = (tipoComida || '').toLowerCase();
-  if (tipo.includes('peruana') || tipo.includes('marina') || tipo.includes('ceviche') || tipo.includes('criolla')) {
-    return peruanoMenu;
-  }
-  if (tipo.includes('italiana') || tipo.includes('pizza') || tipo.includes('pasta')) {
-    return italianoMenu;
-  }
-  if (tipo.includes('japonesa') || tipo.includes('sushi') || tipo.includes('nikkei') || tipo.includes('oriental')) {
-    return japonesMenu;
-  }
-  return defaultMenu;
+function getMenu(tipoComida) {
+  const t = (tipoComida || '').toLowerCase();
+  if (t.includes('peruana') || t.includes('marina') || t.includes('criolla') || t.includes('ceviche')) return MENU.peruana;
+  if (t.includes('italiana') || t.includes('pizza') || t.includes('pasta')) return MENU.italiana;
+  if (t.includes('japonesa') || t.includes('sushi') || t.includes('nikkei')) return MENU.japonesa;
+  return MENU.default;
 }
 
+// ── Sección de Información ─────────────────────────────────────────
+function InfoTab({ restaurantData }) {
+  const { nombre, descripcion, direccion, ciudad, telefono, horario, latitud, longitud, redes_sociales } = restaurantData;
+  const hasCoords = latitud != null && longitud != null;
 
+  return (
+    <div className="space-y-5">
+      {descripcion && (
+        <div className="bg-white rounded-xl p-5 shadow-sm">
+          <h2 className="text-base font-bold text-gray-900 mb-2">Acerca de</h2>
+          <p className="text-gray-600 leading-relaxed text-sm">{descripcion}</p>
+        </div>
+      )}
+
+      <div className="bg-white rounded-xl p-5 shadow-sm">
+        <h2 className="text-base font-bold text-gray-900 mb-4">Información de contacto</h2>
+        <div className="space-y-3">
+          {(direccion || ciudad) && (
+            <div className="flex items-start gap-3">
+              <MapPin className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" />
+              <div>
+                {direccion && <p className="text-gray-700 text-sm">{direccion}</p>}
+                {ciudad && <p className="text-gray-500 text-xs mt-0.5">{ciudad}</p>}
+              </div>
+            </div>
+          )}
+          {telefono && (
+            <div className="flex items-center gap-3">
+              <Phone className="w-5 h-5 text-orange-500 shrink-0" />
+              <a href={`tel:${telefono}`} className="text-gray-700 text-sm hover:text-orange-600 transition cursor-pointer">
+                {telefono}
+              </a>
+            </div>
+          )}
+          {horario && (
+            <div className="flex items-start gap-3">
+              <Clock className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" />
+              <p className="text-gray-700 text-sm">{horario}</p>
+            </div>
+          )}
+          {redes_sociales && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {redes_sociales.instagram && (
+                <a
+                  href={`https://instagram.com/${redes_sociales.instagram.replace('@', '')}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs text-pink-600 bg-pink-50 px-3 py-1.5 rounded-lg hover:bg-pink-100 transition cursor-pointer"
+                >
+                  📸 {redes_sociales.instagram}
+                </a>
+              )}
+              {redes_sociales.facebook && (
+                <a
+                  href={`https://facebook.com/${redes_sociales.facebook}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition cursor-pointer"
+                >
+                  📘 {redes_sociales.facebook}
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+        <div className="px-5 py-4 border-b border-gray-50">
+          <h2 className="text-base font-bold text-gray-900">Ubicación</h2>
+        </div>
+        {hasCoords ? (
+          <div style={{ height: '260px' }}>
+            <MapContainer
+              center={[latitud, longitud]}
+              zoom={16}
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={false}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <Marker position={[latitud, longitud]}>
+                <Popup>{nombre}{ciudad ? `, ${ciudad}` : ''}</Popup>
+              </Marker>
+            </MapContainer>
+          </div>
+        ) : (
+          <div className="h-40 flex flex-col items-center justify-center gap-3 bg-gray-50">
+            <MapPin className="w-8 h-8 text-gray-300" />
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${nombre} ${direccion || ''} ${ciudad || ''}`)}`}
+              target="_blank" rel="noopener noreferrer"
+              className="text-orange-600 hover:underline text-sm cursor-pointer"
+            >
+              Ver en Google Maps →
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Sección de Menú ────────────────────────────────────────────────
+function MenuTab({ tipoComida }) {
+  const platos = getMenu(tipoComida);
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {platos.map((plato, idx) => (
+        <div key={idx} className="bg-white rounded-xl p-4 shadow-sm border border-gray-50 hover:border-orange-100 transition">
+          <div className="flex justify-between items-start gap-2 mb-1">
+            <h3 className="font-bold text-gray-900 text-sm">{plato.nombre}</h3>
+            <span className="text-orange-600 font-bold text-sm shrink-0">{plato.precio}</span>
+          </div>
+          <p className="text-gray-500 text-xs leading-relaxed">{plato.desc}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Sección de Reseñas ─────────────────────────────────────────────
+function ReviewsTab({ restaurantId }) {
+  const { reviews, avgRating, meta, loading, error, sort, handleSortChange, loadMore } = useReviews(restaurantId);
+
+  return (
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
+        <div>
+          {avgRating > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-yellow-400 text-lg">
+                {'★'.repeat(Math.round(avgRating))}{'☆'.repeat(5 - Math.round(avgRating))}
+              </span>
+              <span className="font-bold text-gray-800">{avgRating.toFixed(1)}/5</span>
+              <span className="text-sm text-gray-400">
+                basado en {meta.total} opinión{meta.total !== 1 ? 'es' : ''}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <label className="text-sm text-gray-500">Ordenar:</label>
+          <select
+            value={sort}
+            onChange={(e) => handleSortChange(e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white cursor-pointer focus:outline-none focus:border-orange-500"
+          >
+            <option value="date">Más recientes</option>
+            <option value="rating">Mejor puntuadas</option>
+          </select>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 text-red-600 rounded-xl p-4 text-sm text-center mb-4">{error}</div>
+      )}
+
+      {reviews.length === 0 && !loading && !error && (
+        <div className="bg-gray-50 rounded-2xl p-10 text-center border border-dashed border-gray-200">
+          <span className="text-4xl block mb-3">💬</span>
+          <p className="text-lg font-bold text-gray-800">Sé el primero en opinar</p>
+          <p className="text-sm text-gray-400 mt-1">Comparte tu experiencia con otros turistas.</p>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {reviews.map((r) => (
+          <div key={r.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-base shrink-0 select-none">
+                {r.usuario_nombre?.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-gray-900">{r.usuario_nombre}</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-yellow-400 text-sm">
+                    {'★'.repeat(r.puntuacion)}{'☆'.repeat(5 - r.puntuacion)}
+                  </span>
+                  <span className="text-xs text-gray-400">•</span>
+                  <span className="text-xs text-gray-400">
+                    {new Date(r.fecha_creacion).toLocaleDateString('es-ES', {
+                      day: 'numeric', month: 'short', year: 'numeric',
+                    })}
+                  </span>
+                </div>
+                {r.comentario && (
+                  <p className="text-gray-600 text-sm leading-relaxed mt-2">{r.comentario}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {loading && (
+        <div className="space-y-4 mt-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="animate-pulse bg-gray-50 rounded-xl p-5">
+              <div className="h-4 bg-gray-200 rounded w-1/4 mb-2" />
+              <div className="h-3 bg-gray-200 rounded w-1/3 mb-3" />
+              <div className="h-3 bg-gray-200 rounded w-full mb-1" />
+              <div className="h-3 bg-gray-200 rounded w-5/6" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {meta.page < meta.totalPages && !loading && (
+        <div className="text-center mt-6">
+          <button
+            onClick={loadMore}
+            className="px-6 py-2.5 bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold rounded-xl border border-orange-100 text-sm cursor-pointer transition"
+          >
+            Cargar más opiniones
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Componente principal ───────────────────────────────────────────
 export default function RestaurantDetailPage({ restaurant, onBack }) {
   const { id } = restaurant;
-  const [loaded, setLoaded] = useState(false);
+  const [activeTab, setActiveTab]           = useState('info');
+  const [loaded, setLoaded]                 = useState(false);
   const [restaurantData, setRestaurantData] = useState(restaurant);
-  const [loadingRestaurant, setLoadingRestaurant] = useState(false);
-  const [restaurantError, setRestaurantError] = useState(null);
-  
-  const { reviews, meta, loading, error, sort, handleSortChange, loadMore } = useReviews(id);
+  const [loadingPage, setLoadingPage]       = useState(false);
+  const [pageError, setPageError]           = useState(null);
 
   useEffect(() => {
     if (!id) return;
-    setLoadingRestaurant(true);
-    setRestaurantError(null);
+    setLoadingPage(true);
+    setPageError(null);
 
     fetch(`${API_URL}/api/restaurants/${id}`)
       .then((res) => {
-        if (res.status === 404) {
-          throw new Error('404');
-        }
-        if (!res.ok) {
-          throw new Error('Error al cargar detalles');
-        }
+        if (res.status === 404) throw new Error('404');
+        if (!res.ok) throw new Error('error');
         return res.json();
       })
-      .then((data) => {
-        setRestaurantData(data);
-      })
-      .catch((err) => {
-        if (err.message === '404') {
-          setRestaurantError('404');
-        } else {
-          setRestaurantError('No se pudo verificar el restaurante.');
-        }
-      })
-      .finally(() => {
-        setLoadingRestaurant(false);
-      });
+      .then((data) => setRestaurantData(data))
+      .catch((err) => setPageError(err.message === '404' ? '404' : 'error'))
+      .finally(() => setLoadingPage(false));
   }, [id]);
 
-  if (restaurantError === '404') {
+  if (pageError === '404') {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-md w-full animate-in fade-in zoom-in duration-300">
-          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-2xl">
-            404
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-2xl">404</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Restaurante no encontrado</h2>
-          <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-            Lo sentimos, el restaurante que estás buscando no existe o no se encuentra disponible en este momento.
-          </p>
-          <button
-            onClick={onBack}
-            className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition duration-200 shadow-md text-sm cursor-pointer"
-          >
+          <p className="text-gray-500 text-sm mb-6">El restaurante que buscas no existe o no está disponible.</p>
+          <button onClick={onBack} className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition cursor-pointer">
             Volver al listado
           </button>
         </div>
@@ -119,19 +327,14 @@ export default function RestaurantDetailPage({ restaurant, onBack }) {
     );
   }
 
-  if (restaurantError && restaurantError !== '404') {
+  if (pageError) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-md w-full">
-          <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-            ⚠️
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
+          <div className="text-4xl mb-4">⚠️</div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Error de conexión</h2>
-          <p className="text-gray-500 text-sm mb-6 leading-relaxed">{restaurantError}</p>
-          <button
-            onClick={onBack}
-            className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition duration-200 shadow-md text-sm cursor-pointer"
-          >
+          <p className="text-gray-500 text-sm mb-6">No se pudo cargar la información del restaurante.</p>
+          <button onClick={onBack} className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition cursor-pointer">
             Volver al listado
           </button>
         </div>
@@ -139,24 +342,29 @@ export default function RestaurantDetailPage({ restaurant, onBack }) {
     );
   }
 
-  const { nombre, imagen_url, calificacion, ciudad, direccion, tipo_comida, categoria, descripcion } = restaurantData;
+  const { nombre, imagen_url, calificacion, tipo_comida, categoria } = restaurantData;
+
+  const TABS = [
+    { key: 'info',    label: 'Información' },
+    { key: 'menu',    label: 'Menú' },
+    { key: 'reviews', label: 'Reseñas' },
+  ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
+
       {/* Hero */}
-      <div className="relative h-80 md:h-96 bg-gray-100">
+      <div className="relative h-72 md:h-96 bg-gray-200">
         <img
           src={imagen_url || DEFAULT_IMG}
           alt={nombre}
           loading="lazy"
           onLoad={() => setLoaded(true)}
-          className={`w-full h-full object-cover transition-opacity duration-500 ease-out ${loaded ? 'opacity-100' : 'opacity-0'}`}
-          onError={(e) => { 
-            e.currentTarget.src = DEFAULT_IMG;
-            setLoaded(true); 
-          }}
+          onError={(e) => { e.currentTarget.src = DEFAULT_IMG; setLoaded(true); }}
+          className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
         <button
           onClick={onBack}
           className="absolute top-4 left-4 flex items-center gap-2 bg-white/90 hover:bg-white text-gray-800 px-4 py-2 rounded-lg shadow transition font-medium cursor-pointer"
@@ -164,208 +372,48 @@ export default function RestaurantDetailPage({ restaurant, onBack }) {
           <ArrowLeft className="w-4 h-4" />
           Volver
         </button>
+
+        <div className="absolute bottom-0 left-0 right-0 px-6 pb-5">
+          <h1 className="text-white text-3xl md:text-4xl font-bold drop-shadow-lg">{nombre}</h1>
+          {tipo_comida && <p className="text-white/80 text-sm mt-1">{tipo_comida}</p>}
+        </div>
       </div>
 
-      {/* Contenido */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-1">{nombre}</h1>
-        {tipo_comida && <p className="text-lg text-gray-500 mb-3">{tipo_comida}</p>}
-
-        <Stars value={calificacion} />
-
-        {/* Info */}
-        <div className="mt-6 bg-gray-50 rounded-xl p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {direccion && (
-            <div className="flex items-start gap-2">
-              <MapPin className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" />
-              <div>
-                <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Dirección</p>
-                <p className="text-gray-700">{direccion}</p>
-                {ciudad && <p className="text-gray-500 text-sm">{ciudad}</p>}
-              </div>
-            </div>
-          )}
-          {categoria && (
-            <div className="flex items-start gap-2">
-              <span className="text-orange-500 mt-0.5">🍽️</span>
-              <div>
-                <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Categoría</p>
-                <p className="text-gray-700">{categoria}</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {descripcion && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Acerca de</h2>
-            <p className="text-gray-700 leading-relaxed">{descripcion}</p>
+      {/* Rating + Tabs sticky */}
+      <div className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="flex items-center justify-between py-3 border-b border-gray-50">
+            <Stars value={calificacion} />
+            {categoria && (
+              <span className="text-orange-600 text-xs bg-orange-50 px-3 py-1 rounded-full font-medium">
+                {categoria}
+              </span>
+            )}
           </div>
-        )}
-
-        {/* Mapa */}
-        <div className="mt-8 border-t border-gray-100 pt-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span>📍 Ubicación y Mapa</span>
-          </h2>
-          <div className="relative h-64 w-full bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 shadow-inner group">
-            {/* Visual Mock Map Background */}
-            <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] bg-slate-50 flex items-center justify-center">
-              <div className="text-center px-4 max-w-sm">
-                <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-3 animate-bounce">
-                  📍
-                </div>
-                <p className="font-semibold text-gray-800 text-sm truncate">{nombre}</p>
-                <p className="text-xs text-gray-500 mt-1">{direccion || 'Dirección no especificada'}</p>
-                {ciudad && <p className="text-xs text-gray-400">{ciudad}</p>}
-              </div>
-            </div>
-            <div className="absolute bottom-4 right-4">
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${nombre} ${direccion} ${ciudad}`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-800 font-bold rounded-xl shadow-md text-xs border border-gray-200 flex items-center gap-1.5 transition cursor-pointer"
+          <div className="flex">
+            {TABS.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={`px-5 py-3 text-sm font-semibold border-b-2 transition cursor-pointer ${
+                  activeTab === key
+                    ? 'border-orange-500 text-orange-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
               >
-                🌐 Abrir en Google Maps
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Menú */}
-        <div className="mt-8 border-t border-gray-100 pt-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span>📖 Menú Destacado</span>
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {getMockMenu(tipo_comida).map((plato, idx) => (
-              <div key={idx} className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex flex-col justify-between hover:border-orange-200 transition">
-                <div>
-                  <div className="flex justify-between items-start gap-2 mb-1">
-                    <h3 className="font-bold text-gray-900 text-sm md:text-base">{plato.nombre}</h3>
-                    <span className="text-orange-600 font-bold text-sm shrink-0">{plato.precio}</span>
-                  </div>
-                  <p className="text-gray-500 text-xs md:text-sm leading-relaxed">{plato.desc}</p>
-                </div>
-              </div>
+                {label}
+              </button>
             ))}
           </div>
         </div>
+      </div>
 
-        {/* Sección de Reseñas */}
-        <div className="mt-12 border-t border-gray-100 pt-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <span>Opiniones de comensales</span>
-                <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full">
-                  {meta.total}
-                </span>
-              </h2>
-            </div>
-
-            {/* T03 Selector Dropdown */}
-            <div className="flex items-center gap-2 self-start sm:self-auto">
-              <label htmlFor="sort-reviews" className="text-sm font-medium text-gray-500">
-                Ordenar por:
-              </label>
-              <select
-                id="sort-reviews"
-                value={sort}
-                onChange={(e) => handleSortChange(e.target.value)}
-                className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white font-medium text-gray-700 focus:outline-none focus:border-orange-500 cursor-pointer shadow-sm"
-              >
-                <option value="date">Más recientes</option>
-                <option value="rating">Mejor puntuadas</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Lista de reseñas */}
-          {error && (
-            <div className="bg-red-50 text-red-600 rounded-xl p-4 text-center text-sm font-medium mb-6">
-              {error}
-            </div>
-          )}
-
-          {reviews.length === 0 && !loading && !error && (
-            <div className="bg-gray-50 rounded-2xl p-10 text-center text-gray-500 border border-dashed border-gray-200 mb-6 animate-in fade-in duration-300">
-              <span className="text-4xl block mb-2">💬</span>
-              <p className="text-lg font-bold text-gray-800">Sé el primero en opinar</p>
-              <p className="text-sm text-gray-400 mt-1">Comparte tu experiencia con otros turistas y ayúdalos a elegir el mejor local.</p>
-            </div>
-          )}
-
-          <div className="space-y-4">
-            {reviews.map((r) => {
-              const inicial = r.usuario_nombre ? r.usuario_nombre.charAt(0).toUpperCase() : '?';
-              return (
-                <div key={r.id} className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow transition duration-200">
-                  <div className="flex items-start gap-4">
-                    {/* Avatar circular con inicial */}
-                    <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-base shrink-0 select-none shadow-inner">
-                      {inicial}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="font-bold text-gray-900 text-base">{r.usuario_nombre}</p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-yellow-400 text-sm">
-                              {'★'.repeat(r.puntuacion)}{'☆'.repeat(5 - r.puntuacion)}
-                            </span>
-                            <span className="text-xs text-gray-400 font-medium">•</span>
-                            <span className="text-xs text-gray-400 font-medium">
-                              {new Date(r.fecha_creacion).toLocaleDateString('es-ES', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      {r.comentario && (
-                        <p className="text-gray-600 text-sm leading-relaxed mt-2">{r.comentario}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Skeletons de Carga */}
-          {loading && (
-            <div className="space-y-4 mt-4">
-              {[1, 2].map((i) => (
-                <div key={i} className="animate-pulse bg-gray-50 border border-gray-100 rounded-xl p-5">
-                  <div className="h-4 bg-gray-200 rounded w-1/4 mb-3"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/3 mb-4"></div>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-gray-200 rounded w-full"></div>
-                    <div className="h-3 bg-gray-200 rounded w-5/6"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Botón Cargar Más */}
-          {meta.page < meta.totalPages && !loading && (
-            <div className="text-center mt-8">
-              <button
-                onClick={loadMore}
-                className="px-6 py-2.5 bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold rounded-xl transition duration-200 shadow-sm border border-orange-100 text-sm cursor-pointer"
-              >
-                Cargar más opiniones
-              </button>
-            </div>
-          )}
-        </div>
+      {/* Contenido de la pestaña activa */}
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        {activeTab === 'info'    && <InfoTab    restaurantData={restaurantData} />}
+        {activeTab === 'menu'    && <MenuTab    tipoComida={tipo_comida} />}
+        {activeTab === 'reviews' && <ReviewsTab restaurantId={id} />}
       </div>
     </div>
   );
 }
-

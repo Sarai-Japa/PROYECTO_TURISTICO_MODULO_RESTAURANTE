@@ -3,12 +3,13 @@ import { useState, useEffect } from 'react';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export function useReviews(restaurantId, initialSort = 'date', size = 5) {
-  const [reviews, setReviews] = useState([]);
-  const [sort, setSort] = useState(initialSort);
-  const [page, setPage] = useState(1);
-  const [meta, setMeta] = useState({ total: 0, page: 1, totalPages: 1, size });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [reviews, setReviews]   = useState([]);
+  const [avgRating, setAvgRating] = useState(null);
+  const [sort, setSort]         = useState(initialSort);
+  const [page, setPage]         = useState(1);
+  const [meta, setMeta]         = useState({ total: 0, page: 1, totalPages: 1, size });
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
 
   useEffect(() => {
     if (!restaurantId) return;
@@ -30,6 +31,7 @@ export function useReviews(restaurantId, initialSort = 'date', size = 5) {
             setReviews((prev) => [...prev, ...data.reviews]);
           }
           setMeta(data.meta);
+          if (page === 1) setAvgRating(data.avg_rating ?? null);
           setError('');
         }
       })
@@ -58,5 +60,5 @@ export function useReviews(restaurantId, initialSort = 'date', size = 5) {
     }
   }
 
-  return { reviews, meta, loading, error, sort, handleSortChange, loadMore };
+  return { reviews, avgRating, meta, loading, error, sort, handleSortChange, loadMore };
 }

@@ -14,20 +14,20 @@ const mockReview = {
 
 // Helper para mockear la consulta:
 // 1. SELECT id FROM restaurantes (Verifica existencia)
-// 2. SELECT id, usuario_nombre, ... FROM reseñas (Obtiene datos)
-// 3. SELECT COUNT(*) FROM reseñas (Obtiene total)
-function mockReviewsQuery(restaurantExists, reviewsRows = [], total = reviewsRows.length) {
+// 2. SELECT reseñas (Promise.all[0])
+// 3. SELECT COUNT(*) (Promise.all[1])
+// 4. SELECT AVG(puntuacion) (Promise.all[2]) — agregado en T02 HU08
+function mockReviewsQuery(restaurantExists, reviewsRows = [], total = reviewsRows.length, avgRating = 4.5) {
   jest.clearAllMocks();
 
   if (!restaurantExists) {
-    // Si el restaurante no existe, la primera query del check retorna vacío
     pool.query.mockResolvedValueOnce({ rows: [] });
   } else {
-    // Si existe:
     pool.query
-      .mockResolvedValueOnce({ rows: [{ id: 1 }] })       // 1. Check existencia restaurante
-      .mockResolvedValueOnce({ rows: reviewsRows })       // 2. SELECT reseñas
-      .mockResolvedValueOnce({ rows: [{ total }] });      // 3. COUNT(*) reseñas
+      .mockResolvedValueOnce({ rows: [{ id: 1 }] })              // 1. Check existencia
+      .mockResolvedValueOnce({ rows: reviewsRows })              // 2. SELECT reseñas
+      .mockResolvedValueOnce({ rows: [{ total }] })              // 3. COUNT(*)
+      .mockResolvedValueOnce({ rows: [{ avg_rating: avgRating }] }); // 4. AVG(puntuacion)
   }
 }
 

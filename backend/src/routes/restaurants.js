@@ -59,7 +59,7 @@ router.get('/:id/reviews', async (req, res) => {
       ? 'ORDER BY puntuacion DESC, fecha_creacion DESC'
       : 'ORDER BY fecha_creacion DESC, id DESC';
 
-    const [dataResult, countResult] = await Promise.all([
+    const [dataResult, countResult, avgResult] = await Promise.all([
       pool.query(
         `SELECT id, usuario_nombre, puntuacion, comentario, fecha_creacion
          FROM reseñas
@@ -72,6 +72,10 @@ router.get('/:id/reviews', async (req, res) => {
         'SELECT COUNT(*)::int AS total FROM reseñas WHERE restaurante_id = $1',
         [id]
       ),
+      pool.query(
+        'SELECT COALESCE(AVG(puntuacion), 0)::numeric(3,1) AS avg_rating FROM reseñas WHERE restaurante_id = $1',
+        [id]
+      ),
     ]);
 
     const BANNED_WORDS = [/mierda/i, /puto/i, /puta/i, /joder/i, /basura/i, /inapropiado/i, /estafa/i];
@@ -82,9 +86,11 @@ router.get('/:id/reviews', async (req, res) => {
     const totalFilteredOut = dataResult.rows.length - filteredReviews.length;
     const total      = Math.max(0, countResult.rows[0].total - totalFilteredOut);
     const totalPages = Math.ceil(total / size);
+    const avgRating  = parseFloat(avgResult.rows[0].avg_rating);
 
     res.json({
       reviews: filteredReviews,
+      avg_rating: avgRating,
       meta: { total, page, totalPages, size },
     });
   } catch (err) {
@@ -103,7 +109,9 @@ router.get('/:id', async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT id, nombre, tipo_comida, categoria, descripcion,
-              direccion, ciudad, imagen_url, calificacion
+              direccion, ciudad, telefono, horario,
+              latitud, longitud, redes_sociales,
+              imagen_url, calificacion
        FROM restaurantes
        WHERE id = $1`,
       [id]

@@ -4,24 +4,27 @@ const pool = require('../src/db');
 
 jest.mock('../src/db');
 
-// Restaurante completo (caso base)
+// Restaurante completo con todos los campos (incluye HU07)
 const mockCompleto = {
   id: 1, nombre: 'Pizzería Roma', tipo_comida: 'Italiana', categoria: 'Pizza',
   descripcion: 'Pizzas al horno', direccion: 'Jr. Coliseo 78',
   ciudad: 'Jesús María', imagen_url: 'https://example.com/pizza.jpg', calificacion: '4.1',
+  telefono: '+51 1 461-5523', horario: 'Lun-Sáb 12:00-23:00',
+  latitud: -12.0756, longitud: -77.0476,
+  redes_sociales: { instagram: '@pizzeriaroma', facebook: 'Pizzería Roma' },
 };
 
-// Helpers para mockear el Promise.all (SELECT + COUNT)
+// Helper para mockear Promise.all (SELECT + COUNT) del listado
 function mockQuery(rows, total = rows.length) {
   pool.query
-    .mockResolvedValueOnce({ rows })                        // SELECT datos
-    .mockResolvedValueOnce({ rows: [{ total }] });          // COUNT(*)
+    .mockResolvedValueOnce({ rows })
+    .mockResolvedValueOnce({ rows: [{ total }] });
 }
 
 beforeEach(() => jest.clearAllMocks());
 
 // ══════════════════════════════════════════════════════════════════
-// T05 — Campos mínimos requeridos
+// T05 — Campos mínimos requeridos (listado)
 // ══════════════════════════════════════════════════════════════════
 describe('T05 — API devuelve campos mínimos', () => {
 
@@ -73,7 +76,7 @@ describe('T05 — API devuelve campos mínimos', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════
-// T07 — Datos faltantes
+// T07 HU06 — Datos faltantes en listado
 // ══════════════════════════════════════════════════════════════════
 describe('T07 — Comportamiento con datos faltantes', () => {
 
@@ -121,22 +124,49 @@ describe('T07 — Comportamiento con datos faltantes', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════
-// QA — Detalle de restaurante (PTMA-113)
+// T06 HU07 — Detalle incluye campos relacionados
 // ══════════════════════════════════════════════════════════════════
-describe('QA — Detalle de restaurante (existente, inexistente, inválido)', () => {
+describe('T06 — GET /api/restaurants/:id incluye datos relacionados', () => {
+
+  test('respuesta incluye telefono, horario, coordenadas y redes_sociales', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [mockCompleto] });
+    const res = await request(app).get('/api/restaurants/1');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('telefono', '+51 1 461-5523');
+    expect(res.body).toHaveProperty('horario', 'Lun-Sáb 12:00-23:00');
+    expect(res.body).toHaveProperty('latitud', -12.0756);
+    expect(res.body).toHaveProperty('longitud', -77.0476);
+    expect(res.body).toHaveProperty('redes_sociales');
+    expect(res.body.redes_sociales).toMatchObject({ instagram: '@pizzeriaroma' });
+  });
+
+  test('respuesta incluye campos de listado base junto a los campos de detalle', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [mockCompleto] });
+    const res = await request(app).get('/api/restaurants/1');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('nombre');
+    expect(res.body).toHaveProperty('calificacion');
+    expect(res.body).toHaveProperty('imagen_url');
+    expect(res.body).toHaveProperty('direccion');
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════
+// T07 + T09 HU07 — 404 y datos incompletos en detalle
+// ══════════════════════════════════════════════════════════════════
+describe('T09 — QA detalle: existente, inexistente, datos incompletos', () => {
 
   test('GET /api/restaurants/:id existente → retorna 200 y los detalles', async () => {
     pool.query.mockResolvedValueOnce({ rows: [mockCompleto] });
     const res = await request(app).get('/api/restaurants/1');
 
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      id: 1,
-      nombre: 'Pizzería Roma',
-    });
+    expect(res.body).toMatchObject({ id: 1, nombre: 'Pizzería Roma' });
   });
 
-  test('GET /api/restaurants/:id inexistente → retorna 404', async () => {
+  test('GET /api/restaurants/:id inexistente → retorna 404 (T07)', async () => {
     pool.query.mockResolvedValueOnce({ rows: [] });
     const res = await request(app).get('/api/restaurants/999');
 
@@ -150,5 +180,23 @@ describe('QA — Detalle de restaurante (existente, inexistente, inválido)', ()
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty('error', 'ID de restaurante inválido');
   });
-});
 
+  test('datos incompletos: campos opcionales null → retorna 200 sin error', async () => {
+    const incompleto = {
+      ...mockCompleto,
+      telefono: null, horario: null,
+      latitud: null,  longitud: null,
+      redes_sociales: null, imagen_url: null,
+      descripcion: null, ciudad: null,
+    };
+    pool.query.mockResolvedValueOnce({ rows: [incompleto] });
+    const res = await request(app).get('/api/restaurants/1');
+
+    expect(res.status).toBe(200);
+    expect(res.body.nombre).toBe('Pizzería Roma');
+    expect(res.body.telefono).toBeNull();
+    expect(res.body.horario).toBeNull();
+    expect(res.body.latitud).toBeNull();
+    expect(res.body.redes_sociales).toBeNull();
+  });
+});

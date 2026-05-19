@@ -2,20 +2,20 @@
  * T06 — Carga masiva de restaurantes (120 registros)
  *
  * Variabilidad incluida:
- *   - 20% sin imagen (imagen_url = NULL)  → prueba T07
- *   - 15% sin calificación (calificacion = 0) → prueba T07
- *   - 10% sin ciudad (ciudad = NULL) → prueba T07
- *   - Tipos, categorías y ciudades mezclados aleatoriamente
+ *   - 20% sin imagen (imagen_url = NULL)
+ *   - 15% sin calificación (calificacion = 0)
+ *   - 10% sin ciudad (ciudad = NULL)
+ *   - 15% sin teléfono, 20% sin redes sociales
+ *   - Coordenadas aleatorias dentro del área metropolitana de Lima
  *
  * Uso:
- *   docker compose exec backend node scripts/seed-massive.js
+ *   docker compose exec backend npm run seed:massive
  */
 
 require('dotenv').config();
 const { faker } = require('@faker-js/faker');
 const pool      = require('../src/db');
 
-// ── Listas curadas para variabilidad realista ──────────────────────
 const TIPOS = [
   'Peruana', 'Italiana', 'Japonesa', 'Americana', 'Mexicana',
   'China', 'Marina', 'Cafetería', 'Francesa', 'Española',
@@ -54,34 +54,58 @@ const IMAGENES = [
   'https://images.pexels.com/photos/784633/pexels-photo-784633.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
 ];
 
-// ── Generador de un restaurante ────────────────────────────────────
+const HORARIOS = [
+  'Lun-Dom 12:00-23:00',
+  'Mar-Dom 12:00-22:00',
+  'Lun-Sáb 11:00-23:00, Dom 11:00-21:00',
+  'Lun-Vie 12:00-22:00, Sáb-Dom 11:00-23:00',
+  'Mar-Dom 11:30-22:30',
+  'Lun-Dom 08:00-22:00',
+  'Lun-Sáb 12:00-23:30',
+  'Mié-Dom 12:00-22:00',
+  'Lun-Vie 07:00-21:00, Sáb-Dom 08:00-22:00',
+  'Mar-Sáb 12:00-22:00, Dom 12:00-20:00',
+];
+
 function generarRestaurante(i) {
   const tipo      = faker.helpers.arrayElement(TIPOS);
   const categoria = faker.helpers.arrayElement(CATEGORIAS);
   const prefijo   = faker.helpers.arrayElement(PREFIJOS);
   const sufijo    = faker.word.noun();
+  const handle    = sufijo.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-  // Variabilidad T07: 20% sin imagen, 15% sin rating, 10% sin ciudad
-  const sinImagen   = faker.number.int({ min: 1, max: 100 }) <= 20;
-  const sinRating   = faker.number.int({ min: 1, max: 100 }) <= 15;
-  const sinCiudad   = faker.number.int({ min: 1, max: 100 }) <= 10;
+  const sinImagen  = faker.number.int({ min: 1, max: 100 }) <= 20;
+  const sinRating  = faker.number.int({ min: 1, max: 100 }) <= 15;
+  const sinCiudad  = faker.number.int({ min: 1, max: 100 }) <= 10;
+  const sinTel     = faker.number.int({ min: 1, max: 100 }) <= 15;
+  const sinRedes   = faker.number.int({ min: 1, max: 100 }) <= 20;
+  const conFacebook = faker.number.int({ min: 1, max: 100 }) <= 60;
+
+  const redes = sinRedes ? null : JSON.stringify({
+    instagram: `@${handle}${faker.number.int({ min: 10, max: 99 })}`,
+    ...(conFacebook ? { facebook: `${handle}lima` } : {}),
+  });
 
   return {
-    nombre:      `${prefijo} ${sufijo.charAt(0).toUpperCase() + sufijo.slice(1)} ${i > 10 ? '' : tipo}`.trim(),
-    tipo_comida: tipo,
+    nombre:        `${prefijo} ${sufijo.charAt(0).toUpperCase() + sufijo.slice(1)} ${i > 10 ? '' : tipo}`.trim(),
+    tipo_comida:   tipo,
     categoria,
-    descripcion: faker.lorem.sentence({ min: 8, max: 15 }),
-    direccion:   `${faker.location.streetAddress()}, ${faker.number.int({ min: 1, max: 500 })}`,
-    ciudad:      sinCiudad ? null : faker.helpers.arrayElement(CIUDADES),
-    imagen_url:  sinImagen ? null : faker.helpers.arrayElement(IMAGENES),
-    calificacion: sinRating ? 0 : parseFloat(faker.number.float({ min: 3.0, max: 5.0, fractionDigits: 1 })),
+    descripcion:   faker.lorem.sentence({ min: 8, max: 15 }),
+    direccion:     `${faker.location.streetAddress()}, ${faker.number.int({ min: 1, max: 500 })}`,
+    ciudad:        sinCiudad ? null : faker.helpers.arrayElement(CIUDADES),
+    telefono:      sinTel ? null : `+51 1 ${faker.number.int({ min: 200, max: 499 })}-${faker.number.int({ min: 1000, max: 9999 })}`,
+    horario:       faker.helpers.arrayElement(HORARIOS),
+    latitud:       parseFloat(faker.number.float({ min: -12.20, max: -11.95, fractionDigits: 6 })),
+    longitud:      parseFloat(faker.number.float({ min: -77.15, max: -76.85, fractionDigits: 6 })),
+    redes_sociales: redes,
+    imagen_url:    sinImagen ? null : faker.helpers.arrayElement(IMAGENES),
+    calificacion:  sinRating ? 0 : parseFloat(faker.number.float({ min: 3.0, max: 5.0, fractionDigits: 1 })),
   };
 }
 
-// ── Inserción por lotes ────────────────────────────────────────────
 async function main() {
-  const TOTAL  = 120;
-  const LOTE   = 20;
+  const TOTAL = 120;
+  const LOTE  = 20;
 
   console.log(`Generando ${TOTAL} restaurantes...`);
   const registros = Array.from({ length: TOTAL }, (_, i) => generarRestaurante(i + 1));
@@ -95,12 +119,21 @@ async function main() {
     let   paramIdx = 1;
 
     for (const r of lote) {
-      valores.push(`($${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++})`);
-      params.push(r.nombre, r.tipo_comida, r.categoria, r.descripcion, r.direccion, r.ciudad, r.imagen_url, r.calificacion);
+      valores.push(
+        `($${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++},$${paramIdx++})`
+      );
+      params.push(
+        r.nombre, r.tipo_comida, r.categoria, r.descripcion,
+        r.direccion, r.ciudad, r.telefono, r.horario,
+        r.latitud, r.longitud, r.redes_sociales,
+        r.imagen_url, r.calificacion
+      );
     }
 
     await pool.query(
-      `INSERT INTO restaurantes (nombre, tipo_comida, categoria, descripcion, direccion, ciudad, imagen_url, calificacion)
+      `INSERT INTO restaurantes
+         (nombre, tipo_comida, categoria, descripcion, direccion, ciudad,
+          telefono, horario, latitud, longitud, redes_sociales, imagen_url, calificacion)
        VALUES ${valores.join(', ')}`,
       params
     );
@@ -109,16 +142,19 @@ async function main() {
     console.log(`  ${insertados}/${TOTAL} insertados`);
   }
 
-  // Resumen de variabilidad generada
-  const sinImg    = registros.filter(r => r.imagen_url   === null).length;
-  const sinRating = registros.filter(r => r.calificacion === 0).length;
-  const sinCiudad = registros.filter(r => r.ciudad       === null).length;
+  const sinImg    = registros.filter(r => r.imagen_url    === null).length;
+  const sinRating = registros.filter(r => r.calificacion  === 0).length;
+  const sinCiudad = registros.filter(r => r.ciudad        === null).length;
+  const sinTel    = registros.filter(r => r.telefono      === null).length;
+  const sinRedes  = registros.filter(r => r.redes_sociales === null).length;
 
   console.log('\n✓ Carga completada');
-  console.log(`  Sin imagen:      ${sinImg}  (${Math.round(sinImg / TOTAL * 100)}%)`);
-  console.log(`  Sin calificación: ${sinRating} (${Math.round(sinRating / TOTAL * 100)}%)`);
-  console.log(`  Sin ciudad:      ${sinCiudad}  (${Math.round(sinCiudad / TOTAL * 100)}%)`);
-  console.log(`  Total en BD:     ~${TOTAL + 10} (incluye seed inicial)`);
+  console.log(`  Sin imagen:        ${sinImg}  (${Math.round(sinImg / TOTAL * 100)}%)`);
+  console.log(`  Sin calificación:  ${sinRating} (${Math.round(sinRating / TOTAL * 100)}%)`);
+  console.log(`  Sin ciudad:        ${sinCiudad}  (${Math.round(sinCiudad / TOTAL * 100)}%)`);
+  console.log(`  Sin teléfono:      ${sinTel}  (${Math.round(sinTel / TOTAL * 100)}%)`);
+  console.log(`  Sin redes sociales:${sinRedes}  (${Math.round(sinRedes / TOTAL * 100)}%)`);
+  console.log(`  Total en BD:       ~${TOTAL + 10} (incluye seed inicial)`);
 
   await pool.end();
 }
