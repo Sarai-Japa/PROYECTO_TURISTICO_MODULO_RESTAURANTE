@@ -1,21 +1,22 @@
-import { X } from 'lucide-react';
+import {
+  Wifi, Sun, ParkingCircle, Wind, PawPrint,
+  CalendarCheck, Bike, ShoppingBag, Accessibility, Mountain, X,
+} from 'lucide-react';
 import { useAmenidades } from '../hooks/useAmenidades';
 
-// Emojis por slug para no depender de Lucide para cada amenidad
-const EMOJI = {
-  'wifi':             '📶',
-  'terraza':          '🌿',
-  'estacionamiento':  '🅿️',
-  'aire-acond':       '❄️',
-  'pet-friendly':     '🐾',
-  'reservas':         '📅',
-  'delivery':         '🛵',
-  'para-llevar':      '🛍️',
-  'acceso-discap':    '♿',
-  'vista-panoramica': '🏔️',
+const ICON = {
+  'wifi':             Wifi,
+  'terraza':          Sun,
+  'estacionamiento':  ParkingCircle,
+  'aire-acond':       Wind,
+  'pet-friendly':     PawPrint,
+  'reservas':         CalendarCheck,
+  'delivery':         Bike,
+  'para-llevar':      ShoppingBag,
+  'acceso-discap':    Accessibility,
+  'vista-panoramica': Mountain,
 };
 
-// T01 + T02 HU05: chips de amenidades con indicador visual de filtros activos
 export default function AmenityFilter({ selected, onChange }) {
   const { amenidades, loading } = useAmenidades();
 
@@ -51,6 +52,7 @@ export default function AmenityFilter({ selected, onChange }) {
       <div className="flex flex-wrap gap-2">
         {amenidades.map((a) => {
           const isSelected = selected.includes(a.slug);
+          const Icon = ICON[a.slug];
           return (
             <button
               key={a.slug}
@@ -61,7 +63,7 @@ export default function AmenityFilter({ selected, onChange }) {
                   : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:text-orange-600'
               }`}
             >
-              <span>{EMOJI[a.slug] ?? '•'}</span>
+              {Icon && <Icon className="w-3.5 h-3.5" />}
               {a.nombre}
             </button>
           );

@@ -1,3 +1,4 @@
+import { Utensils } from 'lucide-react';
 import { highlightText } from '../utils/highlight';
 
 // T03: tarjetas de resultado con coincidencias resaltadas — diseño del prototipo
@@ -44,7 +45,9 @@ export default function SearchResults({ results, query, onClear }) {
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-300 text-4xl">🍽️</div>
+                <div className="w-full h-full flex items-center justify-center">
+                  <Utensils className="w-10 h-10 text-gray-300" />
+                </div>
               )}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
             </div>

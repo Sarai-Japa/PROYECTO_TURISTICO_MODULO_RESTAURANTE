@@ -41,7 +41,12 @@ export default function SearchBar({ onSearch }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!query.trim()) return;
+    if (!query.trim()) {
+      // Campo vacío → señal para volver al listado general
+      onSearch(null, '');
+      setOpen(false);
+      return;
+    }
     onSearch(results, query);
     setOpen(false);
   }

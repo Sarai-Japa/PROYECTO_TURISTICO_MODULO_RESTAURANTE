@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Search, MapPin } from 'lucide-react';
 import { useRestaurants } from '../hooks/useRestaurants';
 import RestaurantCard from './RestaurantCard';
 import CardSkeleton from './CardSkeleton';
@@ -108,7 +109,11 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
       <div className="text-center py-16 bg-white rounded-xl shadow-sm">
         {hasFilters ? (
           <>
-            <p className="text-2xl mb-2">{amenities.length > 0 ? '🔍' : '📍'}</p>
+            <div className="flex justify-center mb-2">
+              {amenities.length > 0
+                ? <Search className="w-8 h-8 text-gray-300" />
+                : <MapPin className="w-8 h-8 text-gray-300" />}
+            </div>
             <p className="text-gray-700 font-medium text-lg mb-1">
               Sin resultados con los filtros aplicados
             </p>
