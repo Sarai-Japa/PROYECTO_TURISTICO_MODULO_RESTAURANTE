@@ -10,6 +10,31 @@ INSERT INTO restaurantes (nombre, tipo_comida, categoria, descripcion, direccion
   ('Pizzería Roma',       'Italiana',   'Pizza',        'Pizzas artesanales al horno de leña con ingredientes importados',   'Jr. Coliseo 78',         'Jesús María', '+51 1 461-5523', 'Lun-Sáb 12:00-23:00',              -12.0756, -77.0476, '{"instagram":"@pizzeriaroma","facebook":"Pizzería Roma"}',          'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',   4.1),
   ('Mariscos del Puerto', 'Marina',     'Mariscos',     'Mariscos frescos y ceviches del mar con vista al malecón',          'Av. Costanera 5',        'Magdalena',   '+51 1 263-8891', 'Mar-Dom 11:00-22:00',               -12.0904, -77.0738, '{"instagram":"@mariscosdelpuerto","facebook":"Mariscos del Puerto"}','https://images.pexels.com/photos/3296279/pexels-photo-3296279.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',  4.6);
 
+INSERT INTO amenidades (slug, nombre, icono) VALUES
+  ('wifi',             'Wi-Fi',                  'Wifi'),
+  ('terraza',          'Terraza',                'Sun'),
+  ('estacionamiento',  'Estacionamiento',        'ParkingCircle'),
+  ('aire-acond',       'Aire acondicionado',     'Wind'),
+  ('pet-friendly',     'Pet-friendly',           'PawPrint'),
+  ('reservas',         'Reservas',               'CalendarCheck'),
+  ('delivery',         'Delivery',               'Bike'),
+  ('para-llevar',      'Para llevar',            'ShoppingBag'),
+  ('acceso-discap',    'Acceso a discapacitados','Accessibility'),
+  ('vista-panoramica', 'Vista panorámica',       'Mountain');
+
+-- Amenidades para los 10 restaurantes iniciales
+INSERT INTO restaurante_amenidades (restaurante_id, amenidad_id) VALUES
+  (1, 1),(1, 3),(1, 6),        -- La Brasa Criolla: wifi, estacionamiento, reservas
+  (2, 1),(2, 4),(2, 6),        -- Pasta Italia: wifi, aire acond, reservas
+  (3, 1),(3, 2),(3, 5),        -- Café Aroma: wifi, terraza, pet-friendly
+  (4, 1),(4, 4),(4, 6),        -- Sushi Nikkei: wifi, aire acond, reservas
+  (5, 1),(5, 3),(5, 7),(5, 8), -- Burger Palace: wifi, estacionamiento, delivery, para llevar
+  (6, 2),(6, 9),(6, 10),       -- El Cevichero: terraza, acceso discap, vista panorámica
+  (7, 1),(7, 7),(7, 8),        -- Tacos y Más: wifi, delivery, para llevar
+  (8, 1),(8, 4),(8, 2),        -- Wok Garden: wifi, aire acond, terraza
+  (9, 1),(9, 3),(9, 6),        -- Pizzería Roma: wifi, estacionamiento, reservas
+  (10,2),(10,5),(10,10);       -- Mariscos del Puerto: terraza, pet-friendly, vista panorámica
+
 INSERT INTO reseñas (restaurante_id, usuario_nombre, puntuacion, comentario, fecha_creacion) VALUES
   (1, 'Carlos Mendoza', 5, 'Excelente ceviche, super recomendado.', '2026-05-18 10:00:00'),
   (1, 'Ana Portal', 4, 'Muy rico pero demoró un poco en llegar.', '2026-05-19 11:00:00'),

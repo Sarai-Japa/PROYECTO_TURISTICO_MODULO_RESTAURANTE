@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRestaurants } from '../hooks/useRestaurants';
 import RestaurantCard from './RestaurantCard';
 import CardSkeleton from './CardSkeleton';
 
-// T02: paginación — prev/next + números de página
 function Pagination({ page, totalPages, onChange }) {
   const pages = [];
   const start = Math.max(1, page - 2);
@@ -61,11 +60,18 @@ function Pagination({ page, totalPages, onChange }) {
 
 const SIZE_OPTIONS = [10, 20, 50, 100, 200];
 
-// T01 + T02: lista paginada de restaurantes con skeleton de carga
-export default function RestaurantList({ onSelect }) {
+export default function RestaurantList({ onSelect, locationFilter = null, amenities = [] }) {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(20);
-  const { restaurants, meta, loading, error } = useRestaurants(page, size);
+  const { restaurants, meta, loading, error } = useRestaurants(page, size, locationFilter, amenities);
+
+  const amenitiesKey = [...amenities].sort().join(',');
+
+  // Reset to page 1 when any filter changes
+  useEffect(() => {
+    setPage(1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locationFilter?.lat, locationFilter?.lng, locationFilter?.radius, amenitiesKey]);
 
   function handleSizeChange(newSize) {
     setSize(newSize);
@@ -97,9 +103,24 @@ export default function RestaurantList({ onSelect }) {
   }
 
   if (restaurants.length === 0) {
+    const hasFilters = locationFilter || amenities.length > 0;
     return (
       <div className="text-center py-16 bg-white rounded-xl shadow-sm">
-        <p className="text-gray-500 text-lg">No hay restaurantes disponibles</p>
+        {hasFilters ? (
+          <>
+            <p className="text-2xl mb-2">{amenities.length > 0 ? '🔍' : '📍'}</p>
+            <p className="text-gray-700 font-medium text-lg mb-1">
+              Sin resultados con los filtros aplicados
+            </p>
+            <p className="text-gray-500 text-sm">
+              {amenities.length > 0
+                ? 'Ningún restaurante tiene todas las amenidades seleccionadas. Prueba con menos filtros.'
+                : `No encontramos restaurantes en un radio de ${locationFilter.radius ?? 5} km. Intenta ampliar el radio.`}
+            </p>
+          </>
+        ) : (
+          <p className="text-gray-500 text-lg">No hay restaurantes disponibles</p>
+        )}
       </div>
     );
   }
@@ -108,19 +129,17 @@ export default function RestaurantList({ onSelect }) {
     <div>
       <div className="flex items-center justify-between mb-4">
         <p className="text-gray-600">
-          {meta.total} restaurante{meta.total !== 1 ? 's' : ''} disponible{meta.total !== 1 ? 's' : ''}
+          {meta.total} restaurante{meta.total !== 1 ? 's' : ''}{locationFilter ? ' encontrado' : ' disponible'}{meta.total !== 1 ? 's' : ''}
         </p>
         <SizeSelector size={size} onChange={handleSizeChange} />
       </div>
 
-      {/* T01: grilla responsive — 1 col móvil / 2 col tablet / 3 col desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {restaurants.map((r) => (
           <RestaurantCard key={r.id} restaurant={r} onClick={onSelect} />
         ))}
       </div>
 
-      {/* T02: paginación */}
       {meta.totalPages > 1 && (
         <Pagination page={meta.page} totalPages={meta.totalPages} onChange={setPage} />
       )}

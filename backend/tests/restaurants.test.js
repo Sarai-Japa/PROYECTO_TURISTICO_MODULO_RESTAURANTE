@@ -124,6 +124,185 @@ describe('T07 — Comportamiento con datos faltantes', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════
+// T03 + T04 HU02 — Filtrado geográfico por lat/lng/radius
+// ══════════════════════════════════════════════════════════════════
+describe('T03/T04 HU02 — GET /api/restaurants?lat=&lng=&radius=', () => {
+  const mockConDistancia = { ...mockCompleto, distancia_km: '2.3' };
+
+  test('retorna 200 con restaurantes y campo distancia_km cuando se proporciona lat/lng', async () => {
+    mockQuery([mockConDistancia], 1);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.1176&lng=-77.0282&radius=5');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toHaveLength(1);
+    expect(res.body.restaurants[0]).toHaveProperty('distancia_km');
+  });
+
+  test('retorna lista vacía y meta.total=0 cuando no hay restaurantes en el radio', async () => {
+    mockQuery([], 0);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.1176&lng=-77.0282&radius=5');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  test('funciona sin radius (usa 5 km por defecto)', async () => {
+    mockQuery([mockConDistancia], 1);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.1176&lng=-77.0282');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toHaveLength(1);
+  });
+
+  test('lat/lng inválidos (NaN) → responde como listado normal sin distancia_km', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app)
+      .get('/api/restaurants?lat=abc&lng=xyz');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants[0]).not.toHaveProperty('distancia_km');
+  });
+
+  test('la paginación funciona correctamente con filtro geográfico', async () => {
+    mockQuery(Array(5).fill(mockConDistancia), 12);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.1176&lng=-77.0282&radius=5&page=2&size=5');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta).toMatchObject({ total: 12, page: 2, totalPages: 3, size: 5 });
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════
+// T03 + T04 HU05 — Filtrado por amenidades (many-to-many)
+// ══════════════════════════════════════════════════════════════════
+describe('T03/T04 HU05 — GET /api/restaurants?amenities[]=', () => {
+
+  test('filtra por una amenidad y retorna restaurantes que la tienen', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app).get('/api/restaurants?amenities[]=wifi');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toHaveLength(1);
+    expect(res.body.meta.total).toBe(1);
+  });
+
+  test('filtra por múltiples amenidades (AND) — retorna solo restaurantes con todas', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app)
+      .get('/api/restaurants?amenities[]=wifi&amenities[]=terraza');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toHaveLength(1);
+  });
+
+  test('sin resultados cuando ningún restaurante tiene todas las amenidades', async () => {
+    mockQuery([], 0);
+    const res = await request(app)
+      .get('/api/restaurants?amenities[]=wifi&amenities[]=estacionamiento&amenities[]=terraza');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  test('acepta formato ?amenities=wifi,terraza (coma separado)', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app).get('/api/restaurants?amenities=wifi,terraza');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toHaveLength(1);
+  });
+
+  test('combinación de geo + amenidades devuelve distancia_km', async () => {
+    const mockConDist = { ...mockCompleto, distancia_km: '1.5' };
+    mockQuery([mockConDist], 1);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.11&lng=-77.03&radius=5&amenities[]=wifi');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants[0]).toHaveProperty('distancia_km');
+  });
+
+  test('paginación funciona con filtro de amenidades', async () => {
+    mockQuery(Array(5).fill(mockCompleto), 15);
+    const res = await request(app)
+      .get('/api/restaurants?amenities[]=wifi&page=2&size=5');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta).toMatchObject({ total: 15, page: 2, totalPages: 3 });
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════
+// T08 HU02 — QA: ubicaciones inválidas, sin resultados, radio variable
+// ══════════════════════════════════════════════════════════════════
+describe('T08 HU02 — QA geo: inválidos, sin resultados, radio variable', () => {
+  const mockConDistancia = { ...mockCompleto, distancia_km: '2.3' };
+
+  test('solo lat sin lng → trata como sin filtro geo (listado normal)', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app).get('/api/restaurants?lat=-12.11');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants[0]).not.toHaveProperty('distancia_km');
+  });
+
+  test('radio=1 (muy pequeño) → devuelve 0 resultados sin error', async () => {
+    mockQuery([], 0);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.11&lng=-77.03&radius=1');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  test('radio=25 (grande) → devuelve resultados y paginación correcta', async () => {
+    mockQuery(Array(20).fill(mockConDistancia), 50);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.11&lng=-77.03&radius=25&size=20');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta).toMatchObject({ total: 50, totalPages: 3, size: 20 });
+  });
+
+  test('radio mayor a 50 se limita a 50 km internamente (no rompe)', async () => {
+    mockQuery([mockConDistancia], 1);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.11&lng=-77.03&radius=999');
+
+    expect(res.status).toBe(200);
+  });
+
+  test('resultados vienen ordenados de menor a mayor distancia', async () => {
+    const cerca = { ...mockCompleto, distancia_km: '0.5', id: 1 };
+    const lejos = { ...mockCompleto, distancia_km: '4.8', id: 2 };
+    mockQuery([cerca, lejos], 2);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.11&lng=-77.03&radius=5');
+
+    expect(res.status).toBe(200);
+    expect(parseFloat(res.body.restaurants[0].distancia_km))
+      .toBeLessThan(parseFloat(res.body.restaurants[1].distancia_km));
+  });
+
+  test('ubicación inexistente (coordenadas sin restaurantes cercanos) → mensaje meta vacío', async () => {
+    mockQuery([], 0);
+    const res = await request(app)
+      .get('/api/restaurants?lat=35.6762&lng=139.6503&radius=5'); // Tokio
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════
 // T06 HU07 — Detalle incluye campos relacionados
 // ══════════════════════════════════════════════════════════════════
 describe('T06 — GET /api/restaurants/:id incluye datos relacionados', () => {
