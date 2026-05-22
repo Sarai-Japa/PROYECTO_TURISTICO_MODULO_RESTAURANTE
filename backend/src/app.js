@@ -5,12 +5,14 @@ const searchRouter      = require('./routes/search');
 const restaurantsRouter = require('./routes/restaurants');
 const geocodeRouter     = require('./routes/geocode');
 const amenidadesRouter  = require('./routes/amenidades');
+const authRouter        = require('./routes/auth');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+app.use('/api/auth',        authRouter);
 app.use('/api/search',      searchRouter);
 app.use('/api/restaurants', restaurantsRouter);
 app.use('/api/geocode',     geocodeRouter);

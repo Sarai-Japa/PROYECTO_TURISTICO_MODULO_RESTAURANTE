@@ -1,5 +1,19 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- HU11: autenticación de usuarios
+-- T09: estructura completa: id, email, password_hash, nombre, rol
+CREATE TABLE usuarios (
+  id            SERIAL PRIMARY KEY,
+  nombre        VARCHAR(150) NOT NULL,
+  email         VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  rol           VARCHAR(20)  NOT NULL DEFAULT 'usuario'
+                             CHECK (rol IN ('usuario', 'admin')),
+  created_at    TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_usuarios_email ON usuarios(email);
+
 CREATE TABLE restaurantes (
   id             SERIAL PRIMARY KEY,
   nombre         VARCHAR(200) NOT NULL,
@@ -60,4 +74,16 @@ CREATE TABLE restaurante_amenidades (
 
 CREATE INDEX idx_rest_amen_restaurante ON restaurante_amenidades(restaurante_id);
 CREATE INDEX idx_rest_amen_amenidad    ON restaurante_amenidades(amenidad_id);
+
+-- HU03: horarios estructurados por día de la semana (DOW: 0=domingo … 6=sábado)
+CREATE TABLE restaurant_schedules (
+  id             SERIAL PRIMARY KEY,
+  restaurante_id INT      NOT NULL REFERENCES restaurantes(id) ON DELETE CASCADE,
+  dia_semana     SMALLINT NOT NULL CHECK (dia_semana >= 0 AND dia_semana <= 6),
+  hora_apertura  TIME     NOT NULL,
+  hora_cierre    TIME     NOT NULL,
+  UNIQUE (restaurante_id, dia_semana)
+);
+
+CREATE INDEX idx_schedules_restaurante ON restaurant_schedules(restaurante_id);
 

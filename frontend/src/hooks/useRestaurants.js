@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
-export function useRestaurants(page = 1, size = 20, locationFilter = null, amenities = []) {
+export function useRestaurants(page = 1, size = 20, locationFilter = null, amenities = [], date = null) {
   const [restaurants, setRestaurants] = useState([]);
   const [meta, setMeta]   = useState({ total: 0, page: 1, totalPages: 1, size: 20 });
   const [loading, setLoading] = useState(true);
@@ -24,6 +24,7 @@ export function useRestaurants(page = 1, size = 20, locationFilter = null, ameni
       params.set('radius', radius);
     }
     amenities.forEach((slug) => params.append('amenities[]', slug));
+    if (date) params.set('date', date);
 
     fetch(`${API_URL}/api/restaurants?${params}`)
       .then((res) => {
@@ -46,7 +47,7 @@ export function useRestaurants(page = 1, size = 20, locationFilter = null, ameni
 
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, size, lat, lng, radius, amenitiesKey]);
+  }, [page, size, lat, lng, radius, amenitiesKey, date]);
 
   return { restaurants, meta, loading, error };
 }

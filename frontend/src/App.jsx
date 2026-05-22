@@ -1,43 +1,103 @@
 import { useState } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import HomePage from './pages/HomePage';
 import RestaurantsPage from './pages/RestaurantsPage';
 import RestaurantDetailPage from './pages/RestaurantDetailPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import FavoritesPage from './pages/FavoritesPage';
 
 function getInitialPage() {
-  return window.location.hash === '#restaurantes' ? 'restaurants' : 'home';
+  const h = window.location.hash;
+  if (h === '#restaurantes') return 'restaurants';
+  if (h === '#favoritos')    return 'favorites';
+  return 'home';
 }
 
-export default function App() {
+function AppContent() {
+  const { isAuthenticated, loading } = useAuth();
   const [page, setPage]                             = useState(getInitialPage);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [returnTo, setReturnTo]                     = useState('restaurants');
 
-  function goToRestaurants() {
-    window.location.hash = '#restaurantes';
-    setPage('restaurants');
+  function goTo(dest) {
+    const hashes = { restaurants: '#restaurantes', favorites: '#favoritos', home: '' };
+    window.location.hash = hashes[dest] ?? '';
+    setPage(dest);
   }
 
-  function goToHome() {
-    window.location.hash = '';
-    setPage('home');
+  // T04: redirige a login guardando destino
+  function requireAuth(dest) {
+    if (isAuthenticated) { goTo(dest); return; }
+    setReturnTo(dest);
+    setPage('login');
   }
+
+  // Mostrar nada mientras se rehidrata el token de localStorage
+  if (loading) return null;
 
   if (selectedRestaurant) {
     return (
       <RestaurantDetailPage
         restaurant={selectedRestaurant}
         onBack={() => setSelectedRestaurant(null)}
+        onGoLogin={() => { setReturnTo('restaurants'); setPage('login'); }}
       />
     );
+  }
+
+  if (page === 'login') {
+    return (
+      <LoginPage
+        onSuccess={() => goTo(returnTo)}
+        onGoRegister={() => setPage('register')}
+        onBack={() => goTo('home')}
+      />
+    );
+  }
+
+  if (page === 'register') {
+    return (
+      <RegisterPage
+        onSuccess={() => goTo('restaurants')}
+        onGoLogin={() => setPage('login')}
+        onBack={() => goTo('home')}
+      />
+    );
+  }
+
+  // T04: ruta privada — muestra login si no está autenticado
+  if (page === 'favorites') {
+    if (!isAuthenticated) {
+      return (
+        <LoginPage
+          onSuccess={() => setPage('favorites')}
+          onGoRegister={() => setPage('register')}
+          onBack={() => goTo('home')}
+        />
+      );
+    }
+    return <FavoritesPage onBack={() => goTo('restaurants')} />;
   }
 
   if (page === 'restaurants') {
     return (
       <RestaurantsPage
-        onBack={goToHome}
+        onBack={() => goTo('home')}
         onSelectRestaurant={setSelectedRestaurant}
+        onGoLogin={() => { setReturnTo('restaurants'); setPage('login'); }}
+        onGoFavorites={() => requireAuth('favorites')}
       />
     );
   }
 
-  return <HomePage onExplore={goToRestaurants} />;
+  return <HomePage onExplore={() => goTo('restaurants')} />;
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
 }

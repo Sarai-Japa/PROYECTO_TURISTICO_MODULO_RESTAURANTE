@@ -1,17 +1,21 @@
 import { useState } from 'react';
-import { ChefHat } from 'lucide-react';
+import { ChefHat, LogIn, LogOut, Heart } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import SearchResults from '../components/SearchResults';
 import RestaurantList from '../components/RestaurantList';
 import LocationSearch from '../components/LocationSearch';
 import AmenityFilter from '../components/AmenityFilter';
+import DateFilter from '../components/DateFilter';
+import { useAuth } from '../context/AuthContext';
 
-export default function RestaurantsPage({ onBack, onSelectRestaurant }) {
+export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin, onGoFavorites }) {
+  const { user, isAuthenticated, logout } = useAuth();
   const [searchResults, setSearchResults] = useState(null);
   const [searchQuery, setSearchQuery]     = useState('');
   const [activeLocation, setActiveLocation] = useState(null);
   const [radius, setRadius]               = useState(5);
   const [amenities, setAmenities]         = useState([]);
+  const [selectedDate, setSelectedDate]   = useState(null);
 
   function handleSearch(data, term) {
     setSearchResults(data);
@@ -44,6 +48,40 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant }) {
             <ChefHat className="w-8 h-8 text-orange-500" />
             <span className="text-2xl font-bold text-gray-900">FoodHub</span>
           </button>
+
+          <div className="flex items-center gap-3">
+            {isAuthenticated ? (
+              <>
+                <span className="text-sm text-gray-600 font-medium hidden sm:inline">
+                  Hola, {user?.nombre}
+                </span>
+                <button
+                  onClick={onGoFavorites}
+                  className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-orange-500 transition cursor-pointer"
+                >
+                  <Heart className="w-4 h-4" />
+                  <span className="hidden sm:inline">Favoritos</span>
+                </button>
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-500 transition cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Cerrar sesión</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={onGoLogin}
+                  className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-orange-500 transition cursor-pointer"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Iniciar sesión
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -78,6 +116,14 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant }) {
             <div className="mt-4">
               <AmenityFilter selected={amenities} onChange={setAmenities} />
             </div>
+
+            {/* Filtro por fecha / día de la semana (HU03) */}
+            <div className="mt-4">
+              <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">
+                o filtra por día de apertura
+              </p>
+              <DateFilter selected={selectedDate} onChange={setSelectedDate} />
+            </div>
           </div>
 
           {/* Resultados de búsqueda por texto o listado con filtro geo */}
@@ -92,6 +138,7 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant }) {
               onSelect={onSelectRestaurant}
               locationFilter={locationFilter}
               amenities={amenities}
+              date={selectedDate}
             />
           )}
 

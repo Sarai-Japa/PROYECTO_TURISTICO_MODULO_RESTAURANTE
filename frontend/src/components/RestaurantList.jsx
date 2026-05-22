@@ -61,10 +61,10 @@ function Pagination({ page, totalPages, onChange }) {
 
 const SIZE_OPTIONS = [10, 20, 50, 100, 200];
 
-export default function RestaurantList({ onSelect, locationFilter = null, amenities = [] }) {
+export default function RestaurantList({ onSelect, locationFilter = null, amenities = [], date = null }) {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(20);
-  const { restaurants, meta, loading, error } = useRestaurants(page, size, locationFilter, amenities);
+  const { restaurants, meta, loading, error } = useRestaurants(page, size, locationFilter, amenities, date);
 
   const amenitiesKey = [...amenities].sort().join(',');
 
@@ -72,7 +72,7 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
   useEffect(() => {
     setPage(1);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locationFilter?.lat, locationFilter?.lng, locationFilter?.radius, amenitiesKey]);
+  }, [locationFilter?.lat, locationFilter?.lng, locationFilter?.radius, amenitiesKey, date]);
 
   function handleSizeChange(newSize) {
     setSize(newSize);
@@ -104,7 +104,7 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
   }
 
   if (restaurants.length === 0) {
-    const hasFilters = locationFilter || amenities.length > 0;
+    const hasFilters = locationFilter || amenities.length > 0 || date;
     return (
       <div className="text-center py-16 bg-white rounded-xl shadow-sm">
         {hasFilters ? (
@@ -118,9 +118,11 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
               Sin resultados con los filtros aplicados
             </p>
             <p className="text-gray-500 text-sm">
-              {amenities.length > 0
-                ? 'Ningún restaurante tiene todas las amenidades seleccionadas. Prueba con menos filtros.'
-                : `No encontramos restaurantes en un radio de ${locationFilter.radius ?? 5} km. Intenta ampliar el radio.`}
+              {date && amenities.length === 0 && !locationFilter
+                ? 'Ningún restaurante tiene horario registrado para ese día. Prueba con otra fecha.'
+                : amenities.length > 0
+                  ? 'Ningún restaurante tiene todas las amenidades seleccionadas. Prueba con menos filtros.'
+                  : `No encontramos restaurantes en un radio de ${locationFilter.radius ?? 5} km. Intenta ampliar el radio.`}
             </p>
           </>
         ) : (

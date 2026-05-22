@@ -3,130 +3,123 @@ const pool = require('../db');
 
 const router = Router();
 
-// T03 + T04 HU02 / T03 + T04 HU05:
-// GET /api/restaurants?page=&size=&lat=&lng=&radius=&amenities[]=wifi&amenities[]=terraza
+// Builds filter fragments; returns params array + SQL snippets
+function buildFilters({ lat, lng, radius, amenities, dow }) {
+  const params = [];
+
+  function p(val) {
+    params.push(val);
+    return `$${params.length}`;
+  }
+
+  let hvExpr     = '';
+  let selectExtra = '';
+  let orderBy    = 'r.calificacion DESC, r.nombre ASC';
+  const joins    = [];
+  const wheres   = [];
+
+  if (lat !== null && lng !== null) {
+    const pLat = p(lat);
+    const pLng = p(lng);
+    const pRad = p(radius);
+    hvExpr = `6371 * acos(LEAST(1.0,
+      cos(radians(${pLat})) * cos(radians(r.latitud)) *
+      cos(radians(r.longitud) - radians(${pLng})) +
+      sin(radians(${pLat})) * sin(radians(r.latitud))
+    ))`;
+    wheres.push(`r.latitud IS NOT NULL AND r.longitud IS NOT NULL AND (${hvExpr}) <= ${pRad}`);
+    selectExtra = `, ROUND((${hvExpr})::numeric, 1) AS distancia_km`;
+    orderBy     = `distancia_km ASC, r.calificacion DESC`;
+  }
+
+  if (amenities.length > 0) {
+    joins.push('JOIN restaurante_amenidades ra ON r.id = ra.restaurante_id');
+    joins.push('JOIN amenidades a ON ra.amenidad_id = a.id');
+    wheres.push(`a.slug = ANY(${p(amenities)})`);
+  }
+
+  if (dow !== null) {
+    joins.push(`JOIN restaurant_schedules rs ON r.id = rs.restaurante_id AND rs.dia_semana = ${p(dow)}`);
+  }
+
+  const hasAmenities = amenities.length > 0;
+  const joinSQL   = joins.join('\n  ');
+  const whereSQL  = wheres.length ? `WHERE ${wheres.join('\n    AND ')}` : '';
+  const groupSQL  = hasAmenities ? 'GROUP BY r.id' : '';
+  const havingSQL = hasAmenities ? `HAVING COUNT(DISTINCT a.id) = ${p(amenities.length)}` : '';
+
+  return { params, joinSQL, whereSQL, groupSQL, havingSQL, selectExtra, orderBy };
+}
+
+// GET /api/restaurants  (HU01 / HU02 / HU03 / HU05)
 router.get('/', async (req, res) => {
   const page   = Math.max(1, parseInt(req.query.page)  || 1);
   const size   = Math.min(200, Math.max(1, parseInt(req.query.size) || 20));
   const offset = (page - 1) * size;
 
   // Geo filter (HU02)
-  const lat    = parseFloat(req.query.lat);
-  const lng    = parseFloat(req.query.lng);
+  const latRaw = parseFloat(req.query.lat);
+  const lngRaw = parseFloat(req.query.lng);
   const radius = Math.min(50, Math.max(0.1, parseFloat(req.query.radius) || 5));
-  const hasGeo = !isNaN(lat) && !isNaN(lng);
+  const hasGeo = !isNaN(latRaw) && !isNaN(lngRaw);
+  const lat    = hasGeo ? latRaw : null;
+  const lng    = hasGeo ? lngRaw : null;
 
-  // Amenities filter (HU05) — acepta ?amenities[]=wifi&amenities[]=terraza o ?amenities=wifi,terraza
+  // Amenities filter (HU05) — acepta ?amenities[]=wifi&... o ?amenities=wifi,terraza
   let rawAmen = req.query['amenities[]'] ?? req.query.amenities ?? [];
   if (typeof rawAmen === 'string') rawAmen = rawAmen.split(',').map(s => s.trim());
-  const amenities    = rawAmen.filter(Boolean);
-  const hasAmenities = amenities.length > 0;
+  const amenities = rawAmen.filter(Boolean);
 
-  // Haversine reutilizable (parámetros posicionales varían según el caso)
-  const hv = (latP, lngP) => `
-    6371 * acos(LEAST(1.0,
-      cos(radians($${latP})) * cos(radians(r.latitud)) *
-      cos(radians(r.longitud) - radians($${lngP})) +
-      sin(radians($${latP})) * sin(radians(r.latitud))
-    ))`;
+  // Date filter (HU03) — ?date=YYYY-MM-DD
+  // T06: toda comparación de fechas usa America/Lima para coherencia con el usuario final
+  const dateStr = (req.query.date || '').trim();
+  let dow = null;
+  if (dateStr) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      return res.status(400).json({ error: 'Formato de fecha inválido. Use YYYY-MM-DD' });
+    }
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const d = new Date(year, month - 1, day);
+    if (isNaN(d.getTime()) || d.getMonth() !== month - 1) {
+      return res.status(400).json({ error: 'Fecha inválida' });
+    }
+    // T05: rechazar fechas pasadas usando "hoy" en zona horaria Lima (no UTC del servidor)
+    const todayLima = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+    if (dateStr < todayLima) {
+      return res.status(400).json({ error: 'La fecha no puede ser anterior a hoy' });
+    }
+    dow = d.getDay(); // 0=domingo … 6=sábado (mismo convenio que PostgreSQL DOW)
+  }
 
   try {
-    let dataResult, countResult;
+    const { params, joinSQL, whereSQL, groupSQL, havingSQL, selectExtra, orderBy } =
+      buildFilters({ lat, lng, radius, amenities, dow });
 
-    if (!hasGeo && !hasAmenities) {
-      // ── Caso base: sin filtros ──────────────────────────────────────
-      [dataResult, countResult] = await Promise.all([
-        pool.query(
-          `SELECT id, nombre, tipo_comida, categoria, descripcion,
-                  direccion, ciudad, imagen_url, calificacion
-           FROM restaurantes
-           ORDER BY calificacion DESC, nombre ASC
-           LIMIT $1 OFFSET $2`,
-          [size, offset]
-        ),
-        pool.query('SELECT COUNT(*)::int AS total FROM restaurantes'),
-      ]);
+    const dataParams = [...params, size, offset];
+    const pSize      = `$${dataParams.length - 1}`;
+    const pOffset    = `$${dataParams.length}`;
 
-    } else if (hasGeo && !hasAmenities) {
-      // ── Geo sin amenidades ─────────────────────────────────────────
-      const h    = hv(1, 2);
-      const geoW = `r.latitud IS NOT NULL AND r.longitud IS NOT NULL AND (${h}) <= $3`;
-      [dataResult, countResult] = await Promise.all([
-        pool.query(
-          `SELECT r.id, r.nombre, r.tipo_comida, r.categoria, r.descripcion,
-                  r.direccion, r.ciudad, r.imagen_url, r.calificacion,
-                  ROUND((${h})::numeric, 1) AS distancia_km
-           FROM restaurantes r
-           WHERE ${geoW}
-           ORDER BY distancia_km ASC, r.calificacion DESC
-           LIMIT $4 OFFSET $5`,
-          [lat, lng, radius, size, offset]
-        ),
-        pool.query(
-          `SELECT COUNT(*)::int AS total FROM restaurantes r WHERE ${geoW}`,
-          [lat, lng, radius]
-        ),
-      ]);
+    const dataSQL = `
+      SELECT r.id, r.nombre, r.tipo_comida, r.categoria, r.descripcion,
+             r.direccion, r.ciudad, r.imagen_url, r.calificacion${selectExtra}
+      FROM restaurantes r
+      ${joinSQL}
+      ${whereSQL}
+      ${groupSQL}
+      ${havingSQL}
+      ORDER BY ${orderBy}
+      LIMIT ${pSize} OFFSET ${pOffset}`;
 
-    } else if (!hasGeo && hasAmenities) {
-      // ── Amenidades sin geo ─────────────────────────────────────────
-      const amenJoin = `
-        JOIN restaurante_amenidades ra ON r.id = ra.restaurante_id
-        JOIN amenidades a ON ra.amenidad_id = a.id`;
-      [dataResult, countResult] = await Promise.all([
-        pool.query(
-          `SELECT r.id, r.nombre, r.tipo_comida, r.categoria, r.descripcion,
-                  r.direccion, r.ciudad, r.imagen_url, r.calificacion
-           FROM restaurantes r ${amenJoin}
-           WHERE a.slug = ANY($1)
-           GROUP BY r.id
-           HAVING COUNT(DISTINCT a.id) = $2
-           ORDER BY r.calificacion DESC, r.nombre ASC
-           LIMIT $3 OFFSET $4`,
-          [amenities, amenities.length, size, offset]
-        ),
-        pool.query(
-          `SELECT COUNT(*)::int AS total FROM (
-             SELECT r.id FROM restaurantes r ${amenJoin}
-             WHERE a.slug = ANY($1)
-             GROUP BY r.id
-             HAVING COUNT(DISTINCT a.id) = $2
-           ) sub`,
-          [amenities, amenities.length]
-        ),
-      ]);
+    const countSQL = groupSQL
+      ? `SELECT COUNT(*)::int AS total FROM (
+           SELECT r.id FROM restaurantes r ${joinSQL} ${whereSQL} ${groupSQL} ${havingSQL}
+         ) sub`
+      : `SELECT COUNT(*)::int AS total FROM restaurantes r ${joinSQL} ${whereSQL}`;
 
-    } else {
-      // ── Geo + Amenidades ───────────────────────────────────────────
-      const h    = hv(1, 2);
-      const geoW = `r.latitud IS NOT NULL AND r.longitud IS NOT NULL AND (${h}) <= $3`;
-      const amenJoin = `
-        JOIN restaurante_amenidades ra ON r.id = ra.restaurante_id
-        JOIN amenidades a ON ra.amenidad_id = a.id`;
-      [dataResult, countResult] = await Promise.all([
-        pool.query(
-          `SELECT r.id, r.nombre, r.tipo_comida, r.categoria, r.descripcion,
-                  r.direccion, r.ciudad, r.imagen_url, r.calificacion,
-                  ROUND((${h})::numeric, 1) AS distancia_km
-           FROM restaurantes r ${amenJoin}
-           WHERE ${geoW} AND a.slug = ANY($4)
-           GROUP BY r.id
-           HAVING COUNT(DISTINCT a.id) = $5
-           ORDER BY distancia_km ASC, r.calificacion DESC
-           LIMIT $6 OFFSET $7`,
-          [lat, lng, radius, amenities, amenities.length, size, offset]
-        ),
-        pool.query(
-          `SELECT COUNT(*)::int AS total FROM (
-             SELECT r.id FROM restaurantes r ${amenJoin}
-             WHERE ${geoW} AND a.slug = ANY($4)
-             GROUP BY r.id
-             HAVING COUNT(DISTINCT a.id) = $5
-           ) sub`,
-          [lat, lng, radius, amenities, amenities.length]
-        ),
-      ]);
-    }
+    const [dataResult, countResult] = await Promise.all([
+      pool.query(dataSQL, dataParams),
+      pool.query(countSQL, params),
+    ]);
 
     const total      = countResult.rows[0].total;
     const totalPages = Math.ceil(total / size);
@@ -141,7 +134,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// PTMA-117 (T04): GET /api/restaurants/:id/reviews?page=
+// GET /api/restaurants/:id/reviews?page=
 router.get('/:id/reviews', async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
@@ -149,7 +142,6 @@ router.get('/:id/reviews', async (req, res) => {
   }
 
   try {
-    // Validar si el restaurante existe
     const restCheck = await pool.query('SELECT id FROM restaurantes WHERE id = $1', [id]);
     if (restCheck.rows.length === 0) {
       return res.status(404).json({ error: 'Restaurante no encontrado' });
@@ -160,7 +152,6 @@ router.get('/:id/reviews', async (req, res) => {
     const offset = (page - 1) * size;
     const sort   = req.query.sort === 'rating' ? 'rating' : 'date';
 
-    // date -> fecha_creacion DESC, rating -> puntuacion DESC
     const orderClause = sort === 'rating'
       ? 'ORDER BY puntuacion DESC, fecha_creacion DESC'
       : 'ORDER BY fecha_creacion DESC, id DESC';
@@ -205,7 +196,7 @@ router.get('/:id/reviews', async (req, res) => {
   }
 });
 
-// PTMA-113 (T09): GET /api/restaurants/:id
+// GET /api/restaurants/:id
 router.get('/:id', async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
@@ -235,5 +226,3 @@ router.get('/:id', async (req, res) => {
 });
 
 module.exports = router;
-
-

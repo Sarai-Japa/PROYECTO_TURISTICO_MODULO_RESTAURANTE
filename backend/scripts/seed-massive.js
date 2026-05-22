@@ -76,17 +76,60 @@ const IMAGENES = [
   'https://images.pexels.com/photos/784633/pexels-photo-784633.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
 ];
 
+// DOW: 0=domingo, 1=lunes, 2=martes, 3=miércoles, 4=jueves, 5=viernes, 6=sábado
 const HORARIOS = [
-  'Lun-Dom 12:00-23:00',
-  'Mar-Dom 12:00-22:00',
-  'Lun-Sáb 11:00-23:00, Dom 11:00-21:00',
-  'Lun-Vie 12:00-22:00, Sáb-Dom 11:00-23:00',
-  'Mar-Dom 11:30-22:30',
-  'Lun-Dom 08:00-22:00',
-  'Lun-Sáb 12:00-23:30',
-  'Mié-Dom 12:00-22:00',
-  'Lun-Vie 07:00-21:00, Sáb-Dom 08:00-22:00',
-  'Mar-Sáb 12:00-22:00, Dom 12:00-20:00',
+  {
+    texto: 'Lun-Dom 12:00-23:00',
+    schedules: [0,1,2,3,4,5,6].map(d => ({ dia: d, apertura: '12:00', cierre: '23:00' })),
+  },
+  {
+    texto: 'Mar-Dom 12:00-22:00',
+    schedules: [0,2,3,4,5,6].map(d => ({ dia: d, apertura: '12:00', cierre: '22:00' })),
+  },
+  {
+    texto: 'Lun-Sáb 11:00-23:00, Dom 11:00-21:00',
+    schedules: [
+      ...[1,2,3,4,5,6].map(d => ({ dia: d, apertura: '11:00', cierre: '23:00' })),
+      { dia: 0, apertura: '11:00', cierre: '21:00' },
+    ],
+  },
+  {
+    texto: 'Lun-Vie 12:00-22:00, Sáb-Dom 11:00-23:00',
+    schedules: [
+      ...[1,2,3,4,5].map(d => ({ dia: d, apertura: '12:00', cierre: '22:00' })),
+      ...[0,6].map(d => ({ dia: d, apertura: '11:00', cierre: '23:00' })),
+    ],
+  },
+  {
+    texto: 'Mar-Dom 11:30-22:30',
+    schedules: [0,2,3,4,5,6].map(d => ({ dia: d, apertura: '11:30', cierre: '22:30' })),
+  },
+  {
+    texto: 'Lun-Dom 08:00-22:00',
+    schedules: [0,1,2,3,4,5,6].map(d => ({ dia: d, apertura: '08:00', cierre: '22:00' })),
+  },
+  {
+    texto: 'Lun-Sáb 12:00-23:30',
+    schedules: [1,2,3,4,5,6].map(d => ({ dia: d, apertura: '12:00', cierre: '23:30' })),
+  },
+  {
+    texto: 'Mié-Dom 12:00-22:00',
+    schedules: [0,3,4,5,6].map(d => ({ dia: d, apertura: '12:00', cierre: '22:00' })),
+  },
+  {
+    texto: 'Lun-Vie 07:00-21:00, Sáb-Dom 08:00-22:00',
+    schedules: [
+      ...[1,2,3,4,5].map(d => ({ dia: d, apertura: '07:00', cierre: '21:00' })),
+      ...[0,6].map(d => ({ dia: d, apertura: '08:00', cierre: '22:00' })),
+    ],
+  },
+  {
+    texto: 'Mar-Sáb 12:00-22:00, Dom 12:00-20:00',
+    schedules: [
+      ...[2,3,4,5,6].map(d => ({ dia: d, apertura: '12:00', cierre: '22:00' })),
+      { dia: 0, apertura: '12:00', cierre: '20:00' },
+    ],
+  },
 ];
 
 // Offset de ~500 m para simular distintas calles dentro de la misma ciudad
@@ -124,6 +167,8 @@ function generarRestaurante(i) {
     longitud = parseFloat(faker.number.float({ min: -81.5, max: -68.5, fractionDigits: 6 }));
   }
 
+  const horarioObj = faker.helpers.arrayElement(HORARIOS);
+
   return {
     nombre:         `${prefijo} ${sufijo.charAt(0).toUpperCase() + sufijo.slice(1)} ${i > 10 ? '' : tipo}`.trim(),
     tipo_comida:    tipo,
@@ -132,12 +177,13 @@ function generarRestaurante(i) {
     direccion:      `${faker.location.streetAddress()}, ${faker.number.int({ min: 1, max: 500 })}`,
     ciudad:         ciudadObj ? ciudadObj.nombre : null,
     telefono:       sinTel ? null : `+51 ${faker.number.int({ min: 1, max: 99 })} ${faker.number.int({ min: 200, max: 499 })}-${faker.number.int({ min: 1000, max: 9999 })}`,
-    horario:        faker.helpers.arrayElement(HORARIOS),
+    horario:        horarioObj.texto,
     latitud,
     longitud,
     redes_sociales: redes,
     imagen_url:     sinImagen ? null : faker.helpers.arrayElement(IMAGENES),
     calificacion:   sinRating ? 0 : parseFloat(faker.number.float({ min: 3.0, max: 5.0, fractionDigits: 1 })),
+    schedules:      horarioObj.schedules,
   };
 }
 
@@ -148,7 +194,9 @@ async function main() {
   console.log(`Generando ${TOTAL} restaurantes distribuidos por el Perú...`);
   const registros = Array.from({ length: TOTAL }, (_, i) => generarRestaurante(i + 1));
 
+  const insertedWithSchedules = []; // [{id, schedules}]
   let insertados = 0;
+
   for (let i = 0; i < registros.length; i += LOTE) {
     const lote = registros.slice(i, i + LOTE);
 
@@ -168,13 +216,18 @@ async function main() {
       );
     }
 
-    await pool.query(
+    const result = await pool.query(
       `INSERT INTO restaurantes
          (nombre, tipo_comida, categoria, descripcion, direccion, ciudad,
           telefono, horario, latitud, longitud, redes_sociales, imagen_url, calificacion)
-       VALUES ${valores.join(', ')}`,
+       VALUES ${valores.join(', ')}
+       RETURNING id`,
       params
     );
+
+    result.rows.forEach((row, idx) => {
+      insertedWithSchedules.push({ id: row.id, schedules: lote[idx].schedules });
+    });
 
     insertados += lote.length;
     console.log(`  ${insertados}/${TOTAL} insertados`);
@@ -209,6 +262,29 @@ async function main() {
     );
     console.log(`  ${amenValues.length} asignaciones insertadas`);
   }
+
+  // Insertar horarios estructurados
+  console.log('\nAsignando horarios...');
+  let scheduleCount = 0;
+
+  for (const { id, schedules } of insertedWithSchedules) {
+    if (!schedules || schedules.length === 0) continue;
+    const vals = [];
+    const prms = [];
+    let   pi   = 1;
+    for (const s of schedules) {
+      vals.push(`($${pi++},$${pi++},$${pi++},$${pi++})`);
+      prms.push(id, s.dia, s.apertura, s.cierre);
+    }
+    await pool.query(
+      `INSERT INTO restaurant_schedules (restaurante_id, dia_semana, hora_apertura, hora_cierre)
+       VALUES ${vals.join(', ')} ON CONFLICT DO NOTHING`,
+      prms
+    );
+    scheduleCount += schedules.length;
+  }
+
+  console.log(`  ${scheduleCount} filas de horario insertadas`);
 
   // Resumen por ciudad
   const porCiudad = {};

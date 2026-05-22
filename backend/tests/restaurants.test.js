@@ -363,6 +363,147 @@ describe('T08 HU02 — QA geo: inválidos, sin resultados, radio variable', () =
 });
 
 // ══════════════════════════════════════════════════════════════════
+// T03 + T04 HU03 — Filtrado por fecha / día de la semana
+// ══════════════════════════════════════════════════════════════════
+describe('T03/T04 HU03 — GET /api/restaurants?date=YYYY-MM-DD', () => {
+
+  test('fecha válida en lunes → 200 con restaurantes abiertos ese día', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app).get('/api/restaurants?date=2030-06-17'); // lunes futuro seguro
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toHaveLength(1);
+    expect(res.body.meta.total).toBe(1);
+  });
+
+  test('fecha válida en domingo → puede retornar 0 resultados sin error', async () => {
+    mockQuery([], 0);
+    const res = await request(app).get('/api/restaurants?date=2030-06-16'); // domingo futuro
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  test('formato de fecha inválido → 400', async () => {
+    const res = await request(app).get('/api/restaurants?date=25-05-2026');
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  test('fecha imposible (mes 13) → 400', async () => {
+    const res = await request(app).get('/api/restaurants?date=2030-13-01');
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  test('combinación fecha + geo → 200 con distancia_km', async () => {
+    const mockConDist = { ...mockCompleto, distancia_km: '1.2' };
+    mockQuery([mockConDist], 1);
+    const res = await request(app)
+      .get('/api/restaurants?date=2030-06-17&lat=-12.11&lng=-77.03&radius=5');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants[0]).toHaveProperty('distancia_km');
+  });
+
+  test('combinación fecha + amenidades → 200 sin error', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app)
+      .get('/api/restaurants?date=2030-06-18&amenities[]=wifi');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toHaveLength(1);
+  });
+
+  test('sin parámetro date → no afecta el resultado (listado normal)', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app).get('/api/restaurants');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toHaveLength(1);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════
+// T05 / T06 / T08 HU03 — Fechas pasadas, sin disponibilidad, zona horaria
+// ══════════════════════════════════════════════════════════════════
+describe('T05/T06/T08 HU03 — QA: fechas pasadas, sin disponibilidad, zona horaria', () => {
+
+  test('T05 — fecha claramente pasada → 400 con mensaje de error', async () => {
+    const res = await request(app).get('/api/restaurants?date=2020-01-01');
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/anterior|pasad/i);
+  });
+
+  test('T05 — fecha de ayer → 400 (no se permiten fechas pasadas)', async () => {
+    const ayer = new Date();
+    ayer.setDate(ayer.getDate() - 1);
+    const ayerStr = ayer.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+
+    const res = await request(app).get(`/api/restaurants?date=${ayerStr}`);
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  test('T05 — fecha de hoy (Lima) → 200, no se rechaza como pasada', async () => {
+    mockQuery([mockCompleto], 1);
+    const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+
+    const res = await request(app).get(`/api/restaurants?date=${hoy}`);
+
+    expect(res.status).toBe(200);
+  });
+
+  test('T06 — validación usa zona horaria Lima, no UTC del servidor', async () => {
+    // La fecha de hoy en Lima (UTC-5) nunca debe rechazarse como "pasada"
+    // aunque UTC ya haya avanzado al día siguiente
+    mockQuery([mockCompleto], 1);
+    const hoyLima = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+
+    const res = await request(app).get(`/api/restaurants?date=${hoyLima}`);
+
+    expect(res.status).toBe(200);
+  });
+
+  test('T08 — fecha futura sin restaurantes ese día → 200 con array vacío', async () => {
+    mockQuery([], 0);
+    const res = await request(app).get('/api/restaurants?date=2030-12-25'); // miércoles
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  test('T08 — fecha futura con todos los filtros activos → 200 sin crashear', async () => {
+    const mockConDist = { ...mockCompleto, distancia_km: '2.0' };
+    mockQuery([mockConDist], 1);
+    const res = await request(app)
+      .get('/api/restaurants?date=2030-06-17&lat=-12.11&lng=-77.03&radius=5&amenities[]=wifi');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants[0]).toHaveProperty('distancia_km');
+  });
+
+  test('T08 — año fuera de rango (1900) → 400 por fecha pasada', async () => {
+    const res = await request(app).get('/api/restaurants?date=1900-01-01');
+
+    expect(res.status).toBe(400);
+  });
+
+  test('T08 — formato texto en lugar de fecha → 400', async () => {
+    const res = await request(app).get('/api/restaurants?date=manana');
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════
 // T06 HU07 — Detalle incluye campos relacionados
 // ══════════════════════════════════════════════════════════════════
 describe('T06 — GET /api/restaurants/:id incluye datos relacionados', () => {
