@@ -239,6 +239,66 @@ describe('T03/T04 HU05 — GET /api/restaurants?amenities[]=', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════
+// T07 HU05 — QA: selección múltiple, combinaciones sin resultados
+// ══════════════════════════════════════════════════════════════════
+describe('T07 HU05 — QA amenidades: selección múltiple y casos extremos', () => {
+
+  test('selección de 3 amenidades simultáneas → 200 sin errores', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app)
+      .get('/api/restaurants?amenities[]=wifi&amenities[]=terraza&amenities[]=reservas');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toHaveLength(1);
+  });
+
+  test('combinación de 5 amenidades (muy restrictiva) → 0 resultados sin error', async () => {
+    mockQuery([], 0);
+    const res = await request(app)
+      .get('/api/restaurants?amenities[]=wifi&amenities[]=terraza&amenities[]=estacionamiento&amenities[]=aire-acond&amenities[]=pet-friendly');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  test('slug de amenidad inválido (no existe) → 0 resultados, no crashea (status 200)', async () => {
+    mockQuery([], 0);
+    const res = await request(app)
+      .get('/api/restaurants?amenities[]=slug-que-no-existe');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+  });
+
+  test('sin amenidades seleccionadas → regresa al listado completo sin JOIN', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app).get('/api/restaurants');
+
+    expect(res.status).toBe(200);
+    // No campo distancia_km ni filtro activo
+    expect(res.body.restaurants[0]).not.toHaveProperty('distancia_km');
+  });
+
+  test('selección de todas las amenidades → solo restaurantes con las 10 (puede ser 0)', async () => {
+    mockQuery([], 0);
+    const all = 'wifi,terraza,estacionamiento,aire-acond,pet-friendly,reservas,delivery,para-llevar,acceso-discap,vista-panoramica';
+    const res = await request(app)
+      .get(`/api/restaurants?amenities=${all}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta).toHaveProperty('total');
+  });
+
+  test('una sola amenidad array vacío (valor vacío ignorado) → listado normal', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app).get('/api/restaurants?amenities[]=');
+
+    expect(res.status).toBe(200);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════
 // T08 HU02 — QA: ubicaciones inválidas, sin resultados, radio variable
 // ══════════════════════════════════════════════════════════════════
 describe('T08 HU02 — QA geo: inválidos, sin resultados, radio variable', () => {
