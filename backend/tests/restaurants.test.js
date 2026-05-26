@@ -534,6 +534,101 @@ describe('T06 — GET /api/restaurants/:id incluye datos relacionados', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════
+// T06 — QA: carga masiva de datos (100+ restaurantes)
+// ══════════════════════════════════════════════════════════════════
+describe('T06 — QA carga masiva: 100+ restaurantes', () => {
+
+  test('listado con 100 registros → responde 200 sin error', async () => {
+    mockQuery(Array(20).fill(mockCompleto), 100);
+    const res = await request(app).get('/api/restaurants?size=20');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toHaveLength(20);
+    expect(res.body.meta.total).toBe(100);
+  });
+
+  test('paginación correcta con 100 registros y size=20 → 5 páginas', async () => {
+    mockQuery(Array(20).fill(mockCompleto), 100);
+    const res = await request(app).get('/api/restaurants?page=1&size=20');
+
+    expect(res.body.meta).toMatchObject({ total: 100, page: 1, totalPages: 5, size: 20 });
+  });
+
+  test('última página con 100 registros → meta correcto', async () => {
+    mockQuery(Array(20).fill(mockCompleto), 100);
+    const res = await request(app).get('/api/restaurants?page=5&size=20');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta.page).toBe(5);
+    expect(res.body.meta.totalPages).toBe(5);
+  });
+
+  test('listado con 500 registros → paginación y meta correctos', async () => {
+    mockQuery(Array(20).fill(mockCompleto), 500);
+    const res = await request(app).get('/api/restaurants?page=1&size=20');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta).toMatchObject({ total: 500, totalPages: 25, size: 20 });
+  });
+
+  test('la API nunca devuelve más de 200 registros por página aunque se pida más', async () => {
+    mockQuery(Array(200).fill(mockCompleto), 500);
+    const res = await request(app).get('/api/restaurants?size=999');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta.size).toBeLessThanOrEqual(200);
+  });
+
+  test('filtro por amenidades sobre 100+ registros → responde 200', async () => {
+    mockQuery(Array(20).fill(mockCompleto), 120);
+    const res = await request(app)
+      .get('/api/restaurants?amenities[]=wifi&page=1&size=20');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta.total).toBe(120);
+  });
+
+  test('filtro geo sobre 100+ registros → responde 200 con distancia_km', async () => {
+    const mockConDist = { ...mockCompleto, distancia_km: '1.5' };
+    mockQuery(Array(20).fill(mockConDist), 150);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.11&lng=-77.03&radius=25&size=20');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta.total).toBe(150);
+    expect(res.body.restaurants[0]).toHaveProperty('distancia_km');
+  });
+
+  test('filtro por fecha sobre 100+ registros → responde 200', async () => {
+    mockQuery(Array(20).fill(mockCompleto), 80);
+    const res = await request(app)
+      .get('/api/restaurants?date=2030-06-17&page=1&size=20');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta.total).toBe(80);
+  });
+
+  test('todos los filtros combinados sobre dataset grande → no crashea', async () => {
+    const mockConDist = { ...mockCompleto, distancia_km: '2.0' };
+    mockQuery(Array(10).fill(mockConDist), 10);
+    const res = await request(app)
+      .get('/api/restaurants?date=2030-06-17&lat=-12.11&lng=-77.03&radius=25&amenities[]=wifi&page=1&size=10');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toHaveLength(10);
+  });
+
+  test('página fuera de rango con dataset grande → array vacío, meta correcto', async () => {
+    mockQuery([], 100);
+    const res = await request(app).get('/api/restaurants?page=999&size=20');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(100);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════
 // T07 + T09 HU07 — 404 y datos incompletos en detalle
 // ══════════════════════════════════════════════════════════════════
 describe('T09 — QA detalle: existente, inexistente, datos incompletos', () => {
