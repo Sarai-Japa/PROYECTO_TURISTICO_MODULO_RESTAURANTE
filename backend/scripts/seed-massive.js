@@ -19,15 +19,23 @@ const { faker } = require('@faker-js/faker');
 const pool      = require('../src/db');
 
 const TIPOS = [
-  'Peruana', 'Italiana', 'Japonesa', 'Americana', 'Mexicana',
-  'China', 'Marina', 'Cafetería', 'Francesa', 'Española',
-  'Árabe', 'India', 'Griega', 'Fusión', 'Vegana',
+  'Peruana', 'Criolla', 'Marina', 'Andina', 'Norteña',
+  'Selvática', 'Fusión Peruana', 'Cafetería', 'Italiana', 'China',
+  'Japonesa', 'Americana', 'Mexicana', 'Vegetariana', 'Parrillada',
 ];
 
 const CATEGORIAS = [
-  'Parrilla', 'Pasta', 'Sushi', 'Hamburguesas', 'Tacos',
-  'Wok', 'Ceviche', 'Pizza', 'Desayunos', 'Mariscos',
-  'Postres', 'Ensaladas', 'Ramen', 'Kebab', 'Brunch',
+  // Platos peruanos (99%)
+  'Ceviche', 'Lomo Saltado', 'Ají de Gallina', 'Pollo a la Brasa', 'Anticuchos',
+  'Causa Limeña', 'Tiradito', 'Aguadito', 'Arroz con Pollo', 'Seco de Res',
+  'Chicharrón', 'Pachamanca', 'Tallarín Saltado', 'Sudado de Pescado', 'Carapulcra',
+  'Olluquito con Carne', 'Rocoto Relleno', 'Papa a la Huancaína', 'Arroz con Leche',
+  'Picarones', 'Leche de Tigre', 'Chupe de Camarones', 'Parihuela', 'Sopa a la Minuta',
+  'Adobo', 'Estofado', 'Arroz con Mariscos', 'Jalea', 'Cau Cau', 'Tacu Tacu',
+  'Juane', 'Tacacho con Cecina', 'Patarashca', 'Inchicapi', 'Mazamorra Morada',
+  'Parrilla', 'Desayunos', 'Mariscos', 'Postres', 'Menú del Día',
+  // Internacionales (1%)
+  'Pizza', 'Sushi', 'Hamburguesas',
 ];
 
 // Ciudades reales del Perú con coordenadas del centro urbano
@@ -58,7 +66,49 @@ const CIUDADES = [
 
 const PREFIJOS = [
   'El', 'La', 'Los', 'Las', 'Casa', 'Rincón', 'Sabor',
-  'Punto', 'Lugar', 'Cocina', 'Mesa', 'Fogón',
+  'Fogón', 'Cocina', 'Mesa', 'Punto', 'Tradición',
+];
+
+const SUFIJOS_ES = [
+  'Criollo', 'Criolla', 'Andino', 'Andina', 'Serrano', 'Serrana',
+  'Norteño', 'Norteña', 'Limeño', 'Limeña', 'Huanuqueño', 'Huanuqueña',
+  'Familiar', 'Casero', 'Casera', 'Tradicional', 'Regional', 'Popular',
+  'del Valle', 'del Río', 'de la Sierra', 'del Sol', 'de los Andes',
+  'Peruano', 'Peruana', 'Sabroso', 'Sabrosa', 'Auténtico', 'Auténtica',
+];
+
+const NOMBRES_EN = [
+  'The Grill House', 'Burger Station', 'Sushi Zone', 'Pizza Corner',
+  'The Steak House', 'Noodle Bar', 'Grill & Go', 'Pasta House',
+  'Fast Bites', 'The Food Corner',
+];
+
+const DESCRIPCIONES = [
+  'Ofrecemos los mejores platos de la cocina peruana preparados con ingredientes frescos del mercado.',
+  'Un lugar acogedor donde disfrutar de sabores auténticos y recetas tradicionales de generación en generación.',
+  'Especialistas en comida criolla con el sabor casero que tanto extrañas.',
+  'La mejor sazón de la región, con platos elaborados con productos locales de primera calidad.',
+  'Ven y disfruta de nuestra variada carta con los platos más representativos de la gastronomía peruana.',
+  'Un restaurante familiar donde cada plato está hecho con el cariño y la tradición de siempre.',
+  'Sabores únicos de la sierra peruana en un ambiente tranquilo y acogedor.',
+  'Cocina peruana de autor con ingredientes nativos y técnicas tradicionales.',
+  'El punto de encuentro para los amantes de la buena comida peruana.',
+  'Atendemos con cariño y dedicación para que tu experiencia sea inigualable.',
+  'Platos típicos preparados al momento con recetas originales de la abuela.',
+  'La fusión perfecta entre la cocina andina y los sabores del mar peruano.',
+  'Especialidades de la selva y la sierra en un solo lugar, con productos frescos y naturales.',
+  'Restaurante familiar con más de 10 años brindando el auténtico sabor peruano.',
+  'Disfruta de nuestra cocina tradicional en un ambiente cálido y familiar.',
+];
+
+const TIPOS_VIA = ['Jr.', 'Av.', 'Calle', 'Psje.', 'Jr.', 'Av.', 'Jr.'];
+
+const NOMBRES_VIA = [
+  'Huánuco', 'Lima', 'San Martín', 'Bolívar', 'Grau', 'Pizarro', 'Amazonas',
+  'Junín', 'Libertad', 'Independencia', 'Dos de Mayo', 'Raymondi', 'Constitución',
+  'Leoncio Prado', 'Túpac Amaru', 'San Juan', 'Los Olivos', 'Las Flores',
+  'Los Andes', 'El Sol', 'La Paz', 'Progreso', 'Unión', 'Comercio', 'Central',
+  'Manco Inca', 'Cáceres', 'Castilla', 'Ugarte', 'Villarreal',
 ];
 
 const IMAGENES = [
@@ -136,11 +186,23 @@ const HORARIOS = [
 const OFFSET = 0.005;
 
 function generarRestaurante(i) {
-  const tipo       = faker.helpers.arrayElement(TIPOS);
-  const categoria  = faker.helpers.arrayElement(CATEGORIAS);
-  const prefijo    = faker.helpers.arrayElement(PREFIJOS);
-  const sufijo     = faker.word.noun();
-  const handle     = sufijo.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const tipo      = faker.helpers.arrayElement(TIPOS);
+  const categoria = faker.helpers.arrayElement(CATEGORIAS);
+
+  const esIngles  = faker.number.int({ min: 1, max: 100 }) <= 5;
+  let nombre;
+  if (esIngles) {
+    nombre = faker.helpers.arrayElement(NOMBRES_EN);
+  } else {
+    const prefijo = faker.helpers.arrayElement(PREFIJOS);
+    const sufijo  = faker.helpers.arrayElement(SUFIJOS_ES);
+    nombre = `${prefijo} ${sufijo}`;
+  }
+
+  const handle = nombre
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]/g, '');
 
   const sinImagen   = faker.number.int({ min: 1, max: 100 }) <= 20;
   const sinRating   = faker.number.int({ min: 1, max: 100 }) <= 15;
@@ -169,12 +231,16 @@ function generarRestaurante(i) {
 
   const horarioObj = faker.helpers.arrayElement(HORARIOS);
 
+  const tipoVia   = faker.helpers.arrayElement(TIPOS_VIA);
+  const nombreVia = faker.helpers.arrayElement(NOMBRES_VIA);
+  const numero    = faker.number.int({ min: 100, max: 1999 });
+
   return {
-    nombre:         `${prefijo} ${sufijo.charAt(0).toUpperCase() + sufijo.slice(1)} ${i > 10 ? '' : tipo}`.trim(),
+    nombre,
     tipo_comida:    tipo,
     categoria,
-    descripcion:    faker.lorem.sentence({ min: 8, max: 15 }),
-    direccion:      `${faker.location.streetAddress()}, ${faker.number.int({ min: 1, max: 500 })}`,
+    descripcion:    faker.helpers.arrayElement(DESCRIPCIONES),
+    direccion:      `${tipoVia} ${nombreVia} ${numero}`,
     ciudad:         ciudadObj ? ciudadObj.nombre : null,
     telefono:       sinTel ? null : `+51 ${faker.number.int({ min: 1, max: 99 })} ${faker.number.int({ min: 200, max: 499 })}-${faker.number.int({ min: 1000, max: 9999 })}`,
     horario:        horarioObj.texto,

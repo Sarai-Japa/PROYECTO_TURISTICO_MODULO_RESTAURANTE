@@ -2,7 +2,7 @@ import { Utensils } from 'lucide-react';
 import { highlightText } from '../utils/highlight';
 
 // T03: tarjetas de resultado con coincidencias resaltadas — diseño del prototipo
-export default function SearchResults({ results, query, highlight = true, onClear }) {
+export default function SearchResults({ results, query, highlight = true, onSelect, onClear }) {
   if (!query) return null;
 
   if (results.length === 0) {
@@ -34,7 +34,8 @@ export default function SearchResults({ results, query, highlight = true, onClea
         {results.map((item) => (
           <div
             key={item.id}
-            className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group"
+            onClick={() => onSelect && onSelect(item)}
+            className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group cursor-pointer"
           >
             {/* Imagen */}
             <div className="relative h-48 overflow-hidden bg-gray-100">
