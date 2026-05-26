@@ -2,7 +2,7 @@ import { Utensils } from 'lucide-react';
 import { highlightText } from '../utils/highlight';
 
 // T03: tarjetas de resultado con coincidencias resaltadas — diseño del prototipo
-export default function SearchResults({ results, query, onClear }) {
+export default function SearchResults({ results, query, highlight = true, onClear }) {
   if (!query) return null;
 
   if (results.length === 0) {
@@ -55,14 +55,14 @@ export default function SearchResults({ results, query, onClear }) {
             {/* Info */}
             <div className="p-4">
               <h3 className="font-bold text-gray-900 text-lg mb-1">
-                {highlightText(item.nombre, query)}
+                {highlight ? highlightText(item.nombre, query) : item.nombre}
               </h3>
               <p className="text-sm text-gray-500 mb-1">
                 <span className="inline-block bg-orange-50 text-orange-600 rounded-full px-2 py-0.5 text-xs font-medium mr-1">
-                  {highlightText(item.tipo_comida, query)}
+                  {highlight ? highlightText(item.tipo_comida, query) : item.tipo_comida}
                 </span>
                 <span className="inline-block bg-green-50 text-green-700 rounded-full px-2 py-0.5 text-xs font-medium">
-                  {highlightText(item.categoria, query)}
+                  {highlight ? highlightText(item.categoria, query) : item.categoria}
                 </span>
               </p>
               {item.descripcion && (

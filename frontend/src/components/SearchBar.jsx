@@ -53,7 +53,7 @@ export default function SearchBar({ onSearch }) {
 
   function handleSelect(item) {
     handleChange({ target: { value: item.nombre } });
-    onSearch(results, item.nombre);
+    onSearch(results, item.nombre, false);
     setOpen(false);
   }
 

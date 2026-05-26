@@ -12,14 +12,16 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
   const { user, isAuthenticated, logout } = useAuth();
   const [searchResults, setSearchResults] = useState(null);
   const [searchQuery, setSearchQuery]     = useState('');
+  const [searchHighlight, setSearchHighlight] = useState(true);
   const [activeLocation, setActiveLocation] = useState(null);
   const [radius, setRadius]               = useState(5);
   const [amenities, setAmenities]         = useState([]);
   const [selectedDate, setSelectedDate]   = useState(null);
 
-  function handleSearch(data, term) {
+  function handleSearch(data, term, highlight = true) {
     setSearchResults(data);
     setSearchQuery(term);
+    setSearchHighlight(highlight);
   }
 
   function handleClear() {
@@ -131,6 +133,7 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
             <SearchResults
               results={searchResults}
               query={searchQuery}
+              highlight={searchHighlight}
               onClear={handleClear}
             />
           ) : (
