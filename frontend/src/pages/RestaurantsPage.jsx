@@ -134,6 +134,7 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
               results={searchResults}
               query={searchQuery}
               highlight={searchHighlight}
+              onSelect={onSelectRestaurant}
               onClear={handleClear}
             />
           ) : (
