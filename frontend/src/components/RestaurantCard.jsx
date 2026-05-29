@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, Heart } from 'lucide-react';
 
 const DEFAULT_IMG = 'https://images.pexels.com/photos/67468/pexels-photo-67468.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop';
 
@@ -22,9 +22,21 @@ function Stars({ value }) {
 }
 
 // T01: tarjeta de restaurante — imagen, nombre, calificación (estrellas), ubicación
-export default function RestaurantCard({ restaurant, onClick }) {
+export default function RestaurantCard({ restaurant, onClick, isFavorite = false, onToggleFavorite, isAuthenticated = false, onGoLogin }) {
   const { nombre, imagen_url, calificacion, ciudad, tipo_comida } = restaurant;
   const [loaded, setLoaded] = useState(false);
+  const [animating, setAnimating] = useState(false);
+
+  function handleHeartClick(e) {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      onGoLogin?.();
+      return;
+    }
+    setAnimating(true);
+    setTimeout(() => setAnimating(false), 300);
+    onToggleFavorite?.(restaurant.id);
+  }
 
   return (
     <div
@@ -39,12 +51,25 @@ export default function RestaurantCard({ restaurant, onClick }) {
           loading="lazy"
           onLoad={() => setLoaded(true)}
           className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ease-out ${loaded ? 'opacity-100' : 'opacity-0'}`}
-          onError={(e) => { 
+          onError={(e) => {
             e.currentTarget.src = DEFAULT_IMG;
-            setLoaded(true); 
+            setLoaded(true);
           }}
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
+
+        {/* Botón corazón — HU10-T01 */}
+        <button
+          onClick={handleHeartClick}
+          className={`absolute top-2.5 right-2.5 w-8 h-8 flex items-center justify-center rounded-full shadow-md transition-all cursor-pointer
+            ${isFavorite ? 'bg-red-500 hover:bg-red-600' : 'bg-white/90 hover:bg-white'}
+            ${animating ? 'scale-125' : 'scale-100'}`}
+          aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+        >
+          <Heart
+            className={`w-4 h-4 transition-colors ${isFavorite ? 'text-white fill-white' : 'text-gray-500'}`}
+          />
+        </button>
       </div>
 
       {/* Info */}

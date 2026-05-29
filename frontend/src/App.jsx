@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { useFavorites } from './hooks/useFavorites';
 import HomePage from './pages/HomePage';
 import RestaurantsPage from './pages/RestaurantsPage';
 import RestaurantDetailPage from './pages/RestaurantDetailPage';
@@ -15,7 +16,8 @@ function getInitialPage() {
 }
 
 function AppContent() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, token } = useAuth();
+  const { favoriteIds, toggle: toggleFavorite } = useFavorites(token);
   const [page, setPage]                             = useState(getInitialPage);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [returnTo, setReturnTo]                     = useState('restaurants');
@@ -42,6 +44,9 @@ function AppContent() {
         restaurant={selectedRestaurant}
         onBack={() => setSelectedRestaurant(null)}
         onGoLogin={() => { setReturnTo('restaurants'); setPage('login'); }}
+        isFavorite={favoriteIds.has(selectedRestaurant.id)}
+        onToggleFavorite={toggleFavorite}
+        isAuthenticated={isAuthenticated}
       />
     );
   }
@@ -87,6 +92,8 @@ function AppContent() {
         onSelectRestaurant={setSelectedRestaurant}
         onGoLogin={() => { setReturnTo('restaurants'); setPage('login'); }}
         onGoFavorites={() => requireAuth('favorites')}
+        favoriteIds={favoriteIds}
+        onToggleFavorite={toggleFavorite}
       />
     );
   }
