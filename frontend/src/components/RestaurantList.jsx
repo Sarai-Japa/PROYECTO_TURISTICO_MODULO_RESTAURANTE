@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin } from 'lucide-react';
+import { Search, MapPin, Loader } from 'lucide-react';
 import { useRestaurants } from '../hooks/useRestaurants';
 import RestaurantCard from './RestaurantCard';
 import CardSkeleton from './CardSkeleton';
@@ -81,7 +81,8 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
 
   const skeletonCount = Math.min(size, 12);
 
-  if (loading) {
+  // Carga inicial (sin resultados previos): mostrar esqueletos
+  if (loading && restaurants.length === 0) {
     return (
       <>
         <div className="flex items-center justify-between mb-4">
@@ -135,23 +136,35 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-gray-600">
-          {meta.total} restaurante{meta.total !== 1 ? 's' : ''}{locationFilter ? ' encontrado' : ' disponible'}{meta.total !== 1 ? 's' : ''}
-        </p>
-        <SizeSelector size={size} onChange={handleSizeChange} />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {restaurants.map((r) => (
-          <RestaurantCard key={r.id} restaurant={r} onClick={onSelect} />
-        ))}
-      </div>
-
-      {meta.totalPages > 1 && (
-        <Pagination page={meta.page} totalPages={meta.totalPages} onChange={setPage} />
+    <div className="relative">
+      {/* HU04-T03: overlay de actualización cuando ya hay resultados (sin recargar la página) */}
+      {loading && (
+        <div className="absolute top-0 left-0 right-0 flex justify-center z-10 pointer-events-none">
+          <div className="flex items-center gap-2 bg-white border border-orange-200 rounded-full px-3 py-1 shadow-sm text-sm text-orange-600 mt-1">
+            <Loader className="w-3.5 h-3.5 animate-spin" />
+            <span>Actualizando...</span>
+          </div>
+        </div>
       )}
+
+      <div className={loading ? 'opacity-50 pointer-events-none' : ''}>
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-gray-600">
+            {meta.total} restaurante{meta.total !== 1 ? 's' : ''}{locationFilter ? ' encontrado' : ' disponible'}{meta.total !== 1 ? 's' : ''}
+          </p>
+          <SizeSelector size={size} onChange={handleSizeChange} />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {restaurants.map((r) => (
+            <RestaurantCard key={r.id} restaurant={r} onClick={onSelect} />
+          ))}
+        </div>
+
+        {meta.totalPages > 1 && (
+          <Pagination page={meta.page} totalPages={meta.totalPages} onChange={setPage} />
+        )}
+      </div>
     </div>
   );
 }

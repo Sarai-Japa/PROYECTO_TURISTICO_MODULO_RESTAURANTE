@@ -14,8 +14,9 @@ export function useRestaurants(page = 1, size = 20, locationFilter = null, ameni
   const amenitiesKey = [...amenities].sort().join(',');
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
     setLoading(true);
+    setError('');
 
     const params = new URLSearchParams({ page, size });
     if (lat !== null && lng !== null) {
@@ -26,26 +27,26 @@ export function useRestaurants(page = 1, size = 20, locationFilter = null, ameni
     amenities.forEach((slug) => params.append('amenities[]', slug));
     if (date) params.set('date', date);
 
-    fetch(`${API_URL}/api/restaurants?${params}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Error al cargar restaurantes');
+    fetch(`${API_URL}/api/restaurants?${params}`, { signal: controller.signal })
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || 'Error al cargar restaurantes');
+        }
         return res.json();
       })
       .then((data) => {
-        if (!cancelled) {
-          setRestaurants(data.restaurants);
-          setMeta(data.meta);
-          setError('');
-        }
+        setRestaurants(data.restaurants);
+        setMeta(data.meta);
+        setLoading(false);
       })
-      .catch(() => {
-        if (!cancelled) setError('No se pudo cargar la lista de restaurantes');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+      .catch((err) => {
+        if (err.name === 'AbortError') return;
+        setError(err.message || 'No se pudo cargar la lista de restaurantes');
+        setLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => controller.abort();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, size, lat, lng, radius, amenitiesKey, date]);
 
