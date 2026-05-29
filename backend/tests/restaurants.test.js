@@ -629,6 +629,191 @@ describe('T06 — QA carga masiva: 100+ restaurantes', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════
+// T07 HU04 — QA: todas las combinaciones ubicación + fecha
+// ══════════════════════════════════════════════════════════════════
+describe('T07 HU04 — QA: combinaciones ubicación + fecha (ninguno / solo geo / solo fecha / ambos)', () => {
+  const mockConDistancia = { ...mockCompleto, distancia_km: '3.1' };
+
+  // ── ninguno ──────────────────────────────────────────────────────
+  test('ningún filtro → listado base 200, sin distancia_km', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app).get('/api/restaurants');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants[0]).not.toHaveProperty('distancia_km');
+    expect(res.body.meta).toMatchObject({ total: 1, page: 1, totalPages: 1 });
+  });
+
+  test('ningún filtro con paginación → meta refleja page y size', async () => {
+    mockQuery(Array(10).fill(mockCompleto), 35);
+    const res = await request(app).get('/api/restaurants?page=2&size=10');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta).toMatchObject({ total: 35, page: 2, totalPages: 4, size: 10 });
+  });
+
+  // ── solo ubicación ───────────────────────────────────────────────
+  test('solo geo (lat+lng+radius, sin date) → 200 con distancia_km, sin filtro horario', async () => {
+    mockQuery([mockConDistancia], 1);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=5');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants[0]).toHaveProperty('distancia_km');
+    expect(res.body.meta.total).toBe(1);
+  });
+
+  test('solo geo sin resultados en el radio → 200 con array vacío', async () => {
+    mockQuery([], 0);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=2');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  test('solo geo con paginación → meta correcto, distancia_km en cada registro', async () => {
+    mockQuery(Array(5).fill(mockConDistancia), 18);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=10&page=2&size=5');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta).toMatchObject({ total: 18, page: 2, totalPages: 4, size: 5 });
+    expect(res.body.restaurants[0]).toHaveProperty('distancia_km');
+  });
+
+  // ── solo fecha ───────────────────────────────────────────────────
+  test('solo fecha futura → 200 sin distancia_km (sin filtro geo)', async () => {
+    mockQuery([mockCompleto], 1);
+    const res = await request(app).get('/api/restaurants?date=2030-06-17');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants[0]).not.toHaveProperty('distancia_km');
+    expect(res.body.meta.total).toBe(1);
+  });
+
+  test('solo fecha — día sin horarios registrados → 200 con array vacío', async () => {
+    mockQuery([], 0);
+    const res = await request(app).get('/api/restaurants?date=2030-06-16'); // domingo
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  test('solo fecha con paginación → meta correcto', async () => {
+    mockQuery(Array(10).fill(mockCompleto), 40);
+    const res = await request(app).get('/api/restaurants?date=2030-06-17&page=3&size=10');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta).toMatchObject({ total: 40, page: 3, totalPages: 4, size: 10 });
+  });
+
+  // ── ambos ─────────────────────────────────────────────────────────
+  test('ambos filtros activos (geo + date) → 200 con distancia_km', async () => {
+    mockQuery([mockConDistancia], 1);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=5&date=2030-06-17');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants[0]).toHaveProperty('distancia_km');
+    expect(res.body.meta.total).toBe(1);
+  });
+
+  test('ambos filtros activos sin resultados (radio pequeño + día cerrado) → 200 array vacío', async () => {
+    mockQuery([], 0);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=1&date=2030-06-16');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  test('ambos filtros con paginación → meta correcto y distancia_km en resultados', async () => {
+    mockQuery(Array(5).fill(mockConDistancia), 22);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=10&date=2030-06-17&page=2&size=5');
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta).toMatchObject({ total: 22, page: 2, totalPages: 5, size: 5 });
+    expect(res.body.restaurants[0]).toHaveProperty('distancia_km');
+  });
+
+  test('ambos + amenidades (triple combinación) → 200 con distancia_km', async () => {
+    mockQuery([mockConDistancia], 1);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=5&date=2030-06-17&amenities[]=wifi');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants[0]).toHaveProperty('distancia_km');
+  });
+
+  test('triple combinación sin resultados (amenidades muy restrictivas + radio pequeño + día) → 200 vacío', async () => {
+    mockQuery([], 0);
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=1&date=2030-06-17&amenities[]=wifi&amenities[]=terraza&amenities[]=estacionamiento');
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  // ── errores con filtros combinados ────────────────────────────────
+  test('geo válido + fecha pasada → 400', async () => {
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=5&date=2020-01-15');
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  test('geo válido + fecha con formato inválido → 400', async () => {
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=5&date=17-06-2030');
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  test('geo válido + fecha imposible (31 de noviembre) → 400', async () => {
+    const res = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=5&date=2030-11-31');
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  // ── consistencia de respuesta entre combinaciones ────────────────
+  test('cambio de solo-geo a ambos: ambos devuelven distancia_km (no depende del date)', async () => {
+    mockQuery([mockConDistancia], 1);
+    const resSoloGeo = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=5');
+
+    mockQuery([mockConDistancia], 1);
+    const resAmbos = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=5&date=2030-06-17');
+
+    expect(resSoloGeo.body.restaurants[0]).toHaveProperty('distancia_km');
+    expect(resAmbos.body.restaurants[0]).toHaveProperty('distancia_km');
+  });
+
+  test('cambio de solo-fecha a ambos: solo-fecha no tiene distancia_km, ambos sí', async () => {
+    mockQuery([mockCompleto], 1);
+    const resSoloFecha = await request(app)
+      .get('/api/restaurants?date=2030-06-17');
+
+    mockQuery([mockConDistancia], 1);
+    const resAmbos = await request(app)
+      .get('/api/restaurants?lat=-12.0464&lng=-77.0428&radius=5&date=2030-06-17');
+
+    expect(resSoloFecha.body.restaurants[0]).not.toHaveProperty('distancia_km');
+    expect(resAmbos.body.restaurants[0]).toHaveProperty('distancia_km');
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════
 // T07 + T09 HU07 — 404 y datos incompletos en detalle
 // ══════════════════════════════════════════════════════════════════
 describe('T09 — QA detalle: existente, inexistente, datos incompletos', () => {
