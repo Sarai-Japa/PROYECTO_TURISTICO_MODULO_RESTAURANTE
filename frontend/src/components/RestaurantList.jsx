@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, MapPin, Loader } from 'lucide-react';
 import { useRestaurants } from '../hooks/useRestaurants';
 import RestaurantCard from './RestaurantCard';
@@ -64,15 +64,30 @@ const SIZE_OPTIONS = [10, 20, 50, 100, 200];
 export default function RestaurantList({ onSelect, locationFilter = null, amenities = [], date = null }) {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(20);
-  const { restaurants, meta, loading, error } = useRestaurants(page, size, locationFilter, amenities, date);
 
   const amenitiesKey = [...amenities].sort().join(',');
 
-  // Reset to page 1 when any filter changes
+  const filterKey = [
+    locationFilter?.lat    ?? '',
+    locationFilter?.lng    ?? '',
+    locationFilter?.radius ?? '',
+    amenitiesKey,
+    date ?? '',
+  ].join('|');
+
+  const prevFilterKeyRef = useRef(filterKey);
+
+  // Si el filtro cambió, page efectiva es 1 ya en este render (sin esperar al useEffect)
+  const effectivePage = prevFilterKeyRef.current !== filterKey ? 1 : page;
+
   useEffect(() => {
-    setPage(1);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locationFilter?.lat, locationFilter?.lng, locationFilter?.radius, amenitiesKey, date]);
+    if (prevFilterKeyRef.current !== filterKey) {
+      prevFilterKeyRef.current = filterKey;
+      setPage(1);
+    }
+  }, [filterKey]);
+
+  const { restaurants, meta, loading, error } = useRestaurants(effectivePage, size, locationFilter, amenities, date);
 
   function handleSizeChange(newSize) {
     setSize(newSize);
@@ -150,7 +165,11 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
       <div className={loading ? 'opacity-50 pointer-events-none' : ''}>
         <div className="flex items-center justify-between mb-4">
           <p className="text-gray-600">
-            {meta.total} restaurante{meta.total !== 1 ? 's' : ''}{locationFilter ? ' encontrado' : ' disponible'}{meta.total !== 1 ? 's' : ''}
+            {meta.total} restaurante{meta.total !== 1 ? 's' : ''}{' '}
+            {(locationFilter || amenities.length > 0 || date) ? 'encontrado' : 'disponible'}{meta.total !== 1 ? 's' : ''}
+            {meta.totalPages > 1 && (
+              <span className="text-gray-400 text-sm ml-2">— pág. {effectivePage} de {meta.totalPages}</span>
+            )}
           </p>
           <SizeSelector size={size} onChange={handleSizeChange} />
         </div>
@@ -162,7 +181,7 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
         </div>
 
         {meta.totalPages > 1 && (
-          <Pagination page={meta.page} totalPages={meta.totalPages} onChange={setPage} />
+          <Pagination page={effectivePage} totalPages={meta.totalPages} onChange={setPage} />
         )}
       </div>
     </div>
