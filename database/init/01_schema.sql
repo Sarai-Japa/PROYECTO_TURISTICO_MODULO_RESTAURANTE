@@ -85,5 +85,10 @@ CREATE TABLE restaurant_schedules (
   UNIQUE (restaurante_id, dia_semana)
 );
 
-CREATE INDEX idx_schedules_restaurante ON restaurant_schedules(restaurante_id);
+CREATE INDEX idx_schedules_restaurante  ON restaurant_schedules(restaurante_id);
+-- HU04-T04: índice compuesto para el filtrado combinado (ubicación + fecha).
+-- Permite resolver "restaurantes abiertos el día N" usando idx_schedules_dia antes de
+-- hacer el JOIN con el resultado geo-filtrado. Orden: dia_semana primero porque es
+-- la columna de filtrado; restaurante_id segundo para el nested-loop JOIN.
+CREATE INDEX idx_schedules_dia_restaurante ON restaurant_schedules(dia_semana, restaurante_id);
 
