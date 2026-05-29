@@ -48,7 +48,7 @@ export default function LocationSearch({ activeLocation, radius, onLocationChang
   const showDropdown = (suggestions.length > 0 || loading) && query.trim().length >= 3;
 
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div ref={containerRef} className={`relative ${activeLocation ? '' : 'w-full'}`}>
       {activeLocation ? (
         /* Badge when location is active */
         <div className="flex items-center gap-2 flex-wrap">
