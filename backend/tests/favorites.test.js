@@ -159,9 +159,9 @@ describe('T03 HU10 — GET /api/favorites', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════
-// DELETE /api/favorites/:restaurantId — T03 HU10
+// DELETE /api/favorites/:restaurantId — T04 HU10
 // ══════════════════════════════════════════════════════════════════
-describe('T03 HU10 — DELETE /api/favorites/:restaurantId', () => {
+describe('T04 HU10 — DELETE /api/favorites/:restaurantId', () => {
 
   test('favorito existente → 200 con mensaje de confirmación', async () => {
     pool.query.mockResolvedValueOnce({ rows: [] });
