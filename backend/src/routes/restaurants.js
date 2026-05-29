@@ -3,7 +3,16 @@ const pool = require('../db');
 
 const router = Router();
 
-// Builds filter fragments; returns params array + SQL snippets
+// Builds filter fragments; returns params array + SQL snippets.
+//
+// HU04-T04: orden de aplicación de filtros (location first, then availability):
+//   1. Bounding box en WHERE  → habilita idx_restaurantes_geo (B-tree), descarta el 90%+ de filas
+//   2. Haversine exacto       → sobre el subconjunto que pasó el bounding box
+//   3. JOIN restaurant_schedules → se aplica sobre las filas ya filtradas por ubicación
+//
+// Este orden replica "filtrar primero por ubicación, luego por disponibilidad horaria"
+// sin necesidad de CTE explícita porque el planificador de PostgreSQL respeta la
+// selectividad del WHERE antes de resolver JOINs.
 function buildFilters({ lat, lng, radius, amenities, dow }) {
   const params = [];
 
@@ -12,13 +21,23 @@ function buildFilters({ lat, lng, radius, amenities, dow }) {
     return `$${params.length}`;
   }
 
-  let hvExpr     = '';
+  let hvExpr      = '';
   let selectExtra = '';
-  let orderBy    = 'r.calificacion DESC, r.nombre ASC';
-  const joins    = [];
-  const wheres   = [];
+  let orderBy     = 'r.calificacion DESC, r.nombre ASC';
+  const joins     = [];
+  const wheres    = [];
 
   if (lat !== null && lng !== null) {
+    // Bounding box: pre-filtro rectangular que activa idx_restaurantes_geo.
+    // 1° de latitud ≈ 111.32 km; 1° de longitud ≈ 111.32 * cos(lat) km.
+    const latDelta = radius / 111.32;
+    const lngDelta = radius / (111.32 * Math.cos((lat * Math.PI) / 180));
+    const pLatMin  = p(lat - latDelta);
+    const pLatMax  = p(lat + latDelta);
+    const pLngMin  = p(lng - lngDelta);
+    const pLngMax  = p(lng + lngDelta);
+
+    // Haversine exacto sobre el conjunto ya reducido por el bounding box.
     const pLat = p(lat);
     const pLng = p(lng);
     const pRad = p(radius);
@@ -27,7 +46,12 @@ function buildFilters({ lat, lng, radius, amenities, dow }) {
       cos(radians(r.longitud) - radians(${pLng})) +
       sin(radians(${pLat})) * sin(radians(r.latitud))
     ))`;
-    wheres.push(`r.latitud IS NOT NULL AND r.longitud IS NOT NULL AND (${hvExpr}) <= ${pRad}`);
+
+    wheres.push(
+      `r.latitud  BETWEEN ${pLatMin} AND ${pLatMax}\n` +
+      `    AND r.longitud BETWEEN ${pLngMin} AND ${pLngMax}\n` +
+      `    AND (${hvExpr}) <= ${pRad}`
+    );
     selectExtra = `, ROUND((${hvExpr})::numeric, 1) AS distancia_km`;
     orderBy     = `distancia_km ASC, r.calificacion DESC`;
   }
@@ -38,6 +62,7 @@ function buildFilters({ lat, lng, radius, amenities, dow }) {
     wheres.push(`a.slug = ANY(${p(amenities)})`);
   }
 
+  // HU04-T04: schedule JOIN se aplica DESPUÉS del geo-WHERE → location first, then availability.
   if (dow !== null) {
     joins.push(`JOIN restaurant_schedules rs ON r.id = rs.restaurante_id AND rs.dia_semana = ${p(dow)}`);
   }
