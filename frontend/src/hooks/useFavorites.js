@@ -12,11 +12,11 @@ export function useFavorites(token) {
       return;
     }
     setLoading(true);
-    fetch(`${API_URL}/api/favorites`, {
+    fetch(`${API_URL}/api/favorites?size=200`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data) => setFavoriteIds(new Set(data.favorites)))
+      .then((data) => setFavoriteIds(new Set(data.restaurants.map((r) => r.id))))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [token]);

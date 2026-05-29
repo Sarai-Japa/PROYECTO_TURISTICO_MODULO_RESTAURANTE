@@ -112,32 +112,94 @@ describe('T03 HU10 — POST /api/favorites/:restaurantId', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════
-// GET /api/favorites — T03 HU10 (carga inicial de IDs)
+// GET /api/favorites — T05 HU10 (datos completos con JOIN + paginación)
 // ══════════════════════════════════════════════════════════════════
-describe('T03 HU10 — GET /api/favorites', () => {
+describe('T05 HU10 — GET /api/favorites', () => {
 
-  test('usuario con favoritos → 200 con array de IDs numéricos', async () => {
-    pool.query.mockResolvedValueOnce({
-      rows: [{ restaurant_id: 1 }, { restaurant_id: 7 }, { restaurant_id: 23 }],
-    });
+  const mockRestaurante = {
+    id: 1, nombre: 'Pizzería Roma', tipo_comida: 'Italiana', categoria: 'Pizza',
+    imagen_url: 'https://example.com/pizza.jpg', calificacion: '4.1', ciudad: 'Jesús María',
+  };
+
+  function mockFavQuery(rows, total = rows.length) {
+    pool.query
+      .mockResolvedValueOnce({ rows })                        // SELECT con JOIN
+      .mockResolvedValueOnce({ rows: [{ total }] });          // COUNT
+  }
+
+  test('usuario con favoritos → 200 con datos completos del restaurante', async () => {
+    mockFavQuery([mockRestaurante]);
 
     const res = await request(app)
       .get('/api/favorites')
       .set('Authorization', AUTH_HEADER);
 
     expect(res.status).toBe(200);
-    expect(res.body.favorites).toEqual([1, 7, 23]);
+    expect(res.body.restaurants).toHaveLength(1);
+    const r = res.body.restaurants[0];
+    expect(r).toHaveProperty('id', 1);
+    expect(r).toHaveProperty('nombre', 'Pizzería Roma');
+    expect(r).toHaveProperty('imagen_url');
+    expect(r).toHaveProperty('calificacion');
+    expect(r).toHaveProperty('ciudad');
   });
 
-  test('usuario sin favoritos → 200 con array vacío', async () => {
-    pool.query.mockResolvedValueOnce({ rows: [] });
+  test('respuesta incluye metadatos de paginación', async () => {
+    mockFavQuery([mockRestaurante], 1);
 
     const res = await request(app)
       .get('/api/favorites')
       .set('Authorization', AUTH_HEADER);
 
     expect(res.status).toBe(200);
-    expect(res.body.favorites).toEqual([]);
+    expect(res.body).toHaveProperty('meta');
+    expect(res.body.meta).toMatchObject({ total: 1, page: 1, totalPages: 1 });
+  });
+
+  test('usuario sin favoritos → 200 con array vacío y meta.total = 0', async () => {
+    mockFavQuery([], 0);
+
+    const res = await request(app)
+      .get('/api/favorites')
+      .set('Authorization', AUTH_HEADER);
+
+    expect(res.status).toBe(200);
+    expect(res.body.restaurants).toEqual([]);
+    expect(res.body.meta.total).toBe(0);
+  });
+
+  test('paginación: page=2 size=5 → meta correcto', async () => {
+    mockFavQuery(Array(5).fill(mockRestaurante), 12);
+
+    const res = await request(app)
+      .get('/api/favorites?page=2&size=5')
+      .set('Authorization', AUTH_HEADER);
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta).toMatchObject({ total: 12, page: 2, totalPages: 3, size: 5 });
+  });
+
+  test('size máximo es 200 (protección contra size=999)', async () => {
+    mockFavQuery(Array(10).fill(mockRestaurante), 10);
+
+    const res = await request(app)
+      .get('/api/favorites?size=999')
+      .set('Authorization', AUTH_HEADER);
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta.size).toBeLessThanOrEqual(200);
+  });
+
+  test('los resultados vienen ordenados por fecha de guardado (más reciente primero)', async () => {
+    const primero  = { ...mockRestaurante, id: 5, nombre: 'Más reciente' };
+    const segundo  = { ...mockRestaurante, id: 2, nombre: 'Más antiguo' };
+    mockFavQuery([primero, segundo], 2);
+
+    const res = await request(app)
+      .get('/api/favorites')
+      .set('Authorization', AUTH_HEADER);
+
+    expect(res.body.restaurants[0].nombre).toBe('Más reciente');
   });
 
   test('sin token → 401', async () => {
@@ -146,8 +208,8 @@ describe('T03 HU10 — GET /api/favorites', () => {
     expect(res.status).toBe(401);
   });
 
-  test('la query filtra por el user_id del token (no devuelve favoritos de otros)', async () => {
-    pool.query.mockResolvedValueOnce({ rows: [] });
+  test('la query filtra por user_id del token (no devuelve favoritos de otros)', async () => {
+    mockFavQuery([]);
 
     await request(app)
       .get('/api/favorites')
@@ -155,6 +217,17 @@ describe('T03 HU10 — GET /api/favorites', () => {
 
     const [, params] = pool.query.mock.calls[0];
     expect(params).toContain(mockUser.id);
+  });
+
+  test('error en base de datos → 500', async () => {
+    pool.query.mockRejectedValueOnce(new Error('DB error'));
+
+    const res = await request(app)
+      .get('/api/favorites')
+      .set('Authorization', AUTH_HEADER);
+
+    expect(res.status).toBe(500);
+    expect(res.body).toHaveProperty('error');
   });
 });
 
