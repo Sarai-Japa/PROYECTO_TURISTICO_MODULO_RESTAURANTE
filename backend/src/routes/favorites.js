@@ -7,14 +7,37 @@ const router = Router();
 // Todas las rutas requieren autenticación
 router.use(requireAuth);
 
-// GET /api/favorites — devuelve los IDs de restaurantes favoritos del usuario
+// GET /api/favorites — lista favoritos del usuario con datos completos del restaurante
 router.get('/', async (req, res) => {
+  const page   = Math.max(1, parseInt(req.query.page)  || 1);
+  const size   = Math.min(200, Math.max(1, parseInt(req.query.size) || 20));
+  const offset = (page - 1) * size;
+
   try {
-    const { rows } = await pool.query(
-      'SELECT restaurant_id FROM user_favorites WHERE user_id = $1',
-      [req.user.id]
-    );
-    res.json({ favorites: rows.map((r) => r.restaurant_id) });
+    const [dataResult, countResult] = await Promise.all([
+      pool.query(
+        `SELECT r.id, r.nombre, r.tipo_comida, r.categoria,
+                r.imagen_url, r.calificacion, r.ciudad
+         FROM user_favorites uf
+         JOIN restaurantes r ON r.id = uf.restaurant_id
+         WHERE uf.user_id = $1
+         ORDER BY uf.created_at DESC
+         LIMIT $2 OFFSET $3`,
+        [req.user.id, size, offset]
+      ),
+      pool.query(
+        'SELECT COUNT(*)::int AS total FROM user_favorites WHERE user_id = $1',
+        [req.user.id]
+      ),
+    ]);
+
+    const total      = countResult.rows[0].total;
+    const totalPages = Math.ceil(total / size);
+
+    res.json({
+      restaurants: dataResult.rows,
+      meta: { total, page, totalPages, size },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al obtener favoritos' });
