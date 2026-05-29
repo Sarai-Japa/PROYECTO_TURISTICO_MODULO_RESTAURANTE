@@ -118,11 +118,13 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
               Sin resultados con los filtros aplicados
             </p>
             <p className="text-gray-500 text-sm">
-              {date && amenities.length === 0 && !locationFilter
-                ? 'Ningún restaurante tiene horario registrado para ese día. Prueba con otra fecha.'
-                : amenities.length > 0
-                  ? 'Ningún restaurante tiene todas las amenidades seleccionadas. Prueba con menos filtros.'
-                  : `No encontramos restaurantes en un radio de ${locationFilter.radius ?? 5} km. Intenta ampliar el radio.`}
+              {locationFilter && date
+                ? `No encontramos restaurantes en ${locationFilter.radius ?? 5} km que abran ese día. Prueba con otra fecha o amplía el radio.`
+                : date && !locationFilter
+                  ? 'Ningún restaurante tiene horario registrado para ese día. Prueba con otra fecha.'
+                  : amenities.length > 0
+                    ? 'Ningún restaurante tiene todas las amenidades seleccionadas. Prueba con menos filtros.'
+                    : `No encontramos restaurantes en un radio de ${locationFilter.radius ?? 5} km. Intenta ampliar el radio.`}
             </p>
           </>
         ) : (
