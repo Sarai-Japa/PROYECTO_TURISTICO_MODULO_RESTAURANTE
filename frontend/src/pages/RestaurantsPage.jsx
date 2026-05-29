@@ -179,6 +179,10 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
               highlight={searchHighlight}
               onSelect={onSelectRestaurant}
               onClear={handleClear}
+              favoriteIds={favoriteIds}
+              onToggleFavorite={onToggleFavorite}
+              isAuthenticated={isAuthenticated}
+              onGoLogin={onGoLogin}
             />
           ) : (
             <RestaurantList
