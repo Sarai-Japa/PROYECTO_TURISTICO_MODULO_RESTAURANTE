@@ -99,3 +99,13 @@ CREATE INDEX idx_schedules_restaurante  ON restaurant_schedules(restaurante_id);
 -- la columna de filtrado; restaurante_id segundo para el nested-loop JOIN.
 CREATE INDEX idx_schedules_dia_restaurante ON restaurant_schedules(dia_semana, restaurante_id);
 
+-- HU10: favoritos — tabla pivote usuario ↔ restaurante
+CREATE TABLE user_favorites (
+  user_id        INT NOT NULL REFERENCES usuarios(id)     ON DELETE CASCADE,
+  restaurant_id  INT NOT NULL REFERENCES restaurantes(id) ON DELETE CASCADE,
+  created_at     TIMESTAMP DEFAULT NOW(),
+  PRIMARY KEY (user_id, restaurant_id)
+);
+
+CREATE INDEX idx_favorites_user ON user_favorites(user_id);
+

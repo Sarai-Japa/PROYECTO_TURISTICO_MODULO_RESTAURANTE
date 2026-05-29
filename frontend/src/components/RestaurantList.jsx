@@ -61,7 +61,7 @@ function Pagination({ page, totalPages, onChange }) {
 
 const SIZE_OPTIONS = [10, 20, 50, 100, 200];
 
-export default function RestaurantList({ onSelect, locationFilter = null, amenities = [], date = null }) {
+export default function RestaurantList({ onSelect, locationFilter = null, amenities = [], date = null, favoriteIds = new Set(), onToggleFavorite, isAuthenticated = false, onGoLogin }) {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(20);
 
@@ -176,7 +176,15 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {restaurants.map((r) => (
-            <RestaurantCard key={r.id} restaurant={r} onClick={onSelect} />
+            <RestaurantCard
+              key={r.id}
+              restaurant={r}
+              onClick={onSelect}
+              isFavorite={favoriteIds.has(r.id)}
+              onToggleFavorite={onToggleFavorite}
+              isAuthenticated={isAuthenticated}
+              onGoLogin={onGoLogin}
+            />
           ))}
         </div>
 

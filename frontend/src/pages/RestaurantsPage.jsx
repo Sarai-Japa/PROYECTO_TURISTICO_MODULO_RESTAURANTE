@@ -18,7 +18,7 @@ function formatDateShort(dateStr) {
   return `${dow.charAt(0).toUpperCase() + dow.slice(1)}, ${day} de ${MONTHS_ES[month - 1]}`;
 }
 
-export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin, onGoFavorites }) {
+export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin, onGoFavorites, favoriteIds = new Set(), onToggleFavorite }) {
   const { user, isAuthenticated, logout } = useAuth();
   const [searchResults, setSearchResults] = useState(null);
   const [searchQuery, setSearchQuery]     = useState('');
@@ -186,6 +186,10 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
               locationFilter={locationFilter}
               amenities={amenities}
               date={selectedDate}
+              favoriteIds={favoriteIds}
+              onToggleFavorite={onToggleFavorite}
+              isAuthenticated={isAuthenticated}
+              onGoLogin={onGoLogin}
             />
           )}
 
