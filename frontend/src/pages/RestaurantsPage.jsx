@@ -120,20 +120,22 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
               <div className="flex-1 h-px bg-gray-200" />
             </div>
 
-            {/* Ubicación (HU02 / HU04) */}
-            <LocationSearch
-              activeLocation={activeLocation}
-              radius={radius}
-              onLocationChange={handleLocationChange}
-              onRadiusChange={setRadius}
-            />
-
-            {/* Fecha / día de apertura (HU03 / HU04) */}
-            <div className="mt-3">
+            {/* HU04-T02: fila compartida cuando ambos filtros están activos */}
+            <div className={
+              activeLocation && selectedDate
+                ? 'flex flex-wrap gap-2 items-center'
+                : 'space-y-3'
+            }>
+              <LocationSearch
+                activeLocation={activeLocation}
+                radius={radius}
+                onLocationChange={handleLocationChange}
+                onRadiusChange={setRadius}
+              />
               <DateFilter selected={selectedDate} onChange={setSelectedDate} />
             </div>
 
-            {/* HU04-T01: aviso cuando hay fecha pero no ubicación */}
+            {/* Aviso: fecha activa sin ubicación */}
             {selectedDate && !activeLocation && (
               <div className="mt-2 flex items-center gap-2 text-amber-700 text-sm bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
@@ -141,7 +143,7 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
               </div>
             )}
 
-            {/* HU04-T01: badge combinado cuando ambos filtros están activos */}
+            {/* Badge combinado: ambos filtros activos simultáneamente */}
             {activeLocation && selectedDate && (
               <div className="mt-2 flex items-center gap-2 flex-wrap bg-green-50 border border-green-200 rounded-xl px-3 py-2.5">
                 <span className="text-xs font-semibold text-green-700 uppercase tracking-wide">Filtros combinados</span>
