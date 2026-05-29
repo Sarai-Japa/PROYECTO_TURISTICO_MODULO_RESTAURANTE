@@ -1,8 +1,38 @@
-import { Utensils } from 'lucide-react';
+import { useState } from 'react';
+import { Utensils, Heart } from 'lucide-react';
 import { highlightText } from '../utils/highlight';
 
+function HeartButton({ restaurantId, isFavorite, onToggleFavorite, isAuthenticated, onGoLogin }) {
+  const [animating, setAnimating] = useState(false);
+
+  function handleClick(e) {
+    e.stopPropagation();
+    if (!isAuthenticated) { onGoLogin?.(); return; }
+    setAnimating(true);
+    setTimeout(() => setAnimating(false), 300);
+    onToggleFavorite?.(restaurantId);
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      title={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+      aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+      className={`absolute top-2.5 right-2.5 w-8 h-8 flex items-center justify-center rounded-full shadow-md
+        transition-all duration-200 cursor-pointer
+        ${isFavorite ? 'bg-red-500 hover:bg-red-600' : 'bg-white/90 hover:bg-white'}
+        ${animating ? 'scale-125' : 'scale-100'}`}
+    >
+      <Heart
+        fill={isFavorite ? 'currentColor' : 'none'}
+        className={`w-4 h-4 transition-colors duration-200 ${isFavorite ? 'text-white' : 'text-gray-500'}`}
+      />
+    </button>
+  );
+}
+
 // T03: tarjetas de resultado con coincidencias resaltadas — diseño del prototipo
-export default function SearchResults({ results, query, highlight = true, onSelect, onClear }) {
+export default function SearchResults({ results, query, highlight = true, onSelect, onClear, favoriteIds = new Set(), onToggleFavorite, isAuthenticated = false, onGoLogin }) {
   if (!query) return null;
 
   if (results.length === 0) {
@@ -51,6 +81,13 @@ export default function SearchResults({ results, query, highlight = true, onSele
                 </div>
               )}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
+              <HeartButton
+                restaurantId={item.id}
+                isFavorite={favoriteIds.has(item.id)}
+                onToggleFavorite={onToggleFavorite}
+                isAuthenticated={isAuthenticated}
+                onGoLogin={onGoLogin}
+              />
             </div>
 
             {/* Info */}

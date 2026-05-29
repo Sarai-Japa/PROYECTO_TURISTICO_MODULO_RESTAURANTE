@@ -58,16 +58,19 @@ export default function RestaurantCard({ restaurant, onClick, isFavorite = false
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
 
-        {/* Botón corazón — HU10-T01 */}
+        {/* Botón corazón — HU10-T01/T02 */}
         <button
           onClick={handleHeartClick}
-          className={`absolute top-2.5 right-2.5 w-8 h-8 flex items-center justify-center rounded-full shadow-md transition-all cursor-pointer
+          title={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+          aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+          className={`absolute top-2.5 right-2.5 w-8 h-8 flex items-center justify-center rounded-full shadow-md
+            transition-all duration-200 cursor-pointer
             ${isFavorite ? 'bg-red-500 hover:bg-red-600' : 'bg-white/90 hover:bg-white'}
             ${animating ? 'scale-125' : 'scale-100'}`}
-          aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
         >
           <Heart
-            className={`w-4 h-4 transition-colors ${isFavorite ? 'text-white fill-white' : 'text-gray-500'}`}
+            fill={isFavorite ? 'currentColor' : 'none'}
+            className={`w-4 h-4 transition-colors duration-200 ${isFavorite ? 'text-white' : 'text-gray-500'}`}
           />
         </button>
       </div>
