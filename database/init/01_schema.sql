@@ -58,6 +58,13 @@ CREATE INDEX idx_reseñas_restaurante_id ON reseñas(restaurante_id);
 CREATE INDEX idx_restaurantes_geo ON restaurantes (latitud, longitud)
   WHERE latitud IS NOT NULL AND longitud IS NOT NULL;
 
+-- HU04-T05: covering index geográfico — elimina heap fetches en el Index Only Scan
+-- al incluir todas las columnas del SELECT en el índice.
+-- Convierte "Index Scan" → "Index Only Scan" para queries geo-filtradas.
+CREATE INDEX idx_restaurantes_geo_covering ON restaurantes (latitud, longitud)
+  INCLUDE (id, nombre, tipo_comida, categoria, descripcion, direccion, ciudad, imagen_url, calificacion)
+  WHERE latitud IS NOT NULL AND longitud IS NOT NULL;
+
 -- HU05: amenidades y relación many-to-many con restaurantes
 CREATE TABLE amenidades (
   id     SERIAL PRIMARY KEY,
