@@ -103,9 +103,11 @@ CREATE INDEX idx_schedules_dia_restaurante ON restaurant_schedules(dia_semana, r
 CREATE TABLE user_favorites (
   user_id        INT NOT NULL REFERENCES usuarios(id)     ON DELETE CASCADE,
   restaurant_id  INT NOT NULL REFERENCES restaurantes(id) ON DELETE CASCADE,
-  created_at     TIMESTAMP DEFAULT NOW(),
+  created_at     TIMESTAMP NOT NULL DEFAULT NOW(),
   PRIMARY KEY (user_id, restaurant_id)
 );
 
-CREATE INDEX idx_favorites_user ON user_favorites(user_id);
+-- HU10-T06: cubre WHERE user_id = $1 ORDER BY created_at DESC del GET /api/favorites.
+-- Reemplaza idx_favorites_user (redundante con la PK) y elimina el sort en memoria.
+CREATE INDEX idx_favorites_user_date ON user_favorites(user_id, created_at DESC);
 
