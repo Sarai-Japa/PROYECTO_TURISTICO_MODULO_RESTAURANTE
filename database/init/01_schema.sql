@@ -46,6 +46,7 @@ CREATE INDEX idx_restaurantes_fts ON restaurantes
 CREATE TABLE reseñas (
   id             SERIAL PRIMARY KEY,
   restaurante_id INT NOT NULL REFERENCES restaurantes(id) ON DELETE CASCADE,
+  usuario_id     INT REFERENCES usuarios(id) ON DELETE CASCADE,
   usuario_nombre VARCHAR(150) NOT NULL,
   puntuacion     INT NOT NULL CONSTRAINT chk_puntuacion CHECK (puntuacion >= 1 AND puntuacion <= 5),
   comentario     TEXT,

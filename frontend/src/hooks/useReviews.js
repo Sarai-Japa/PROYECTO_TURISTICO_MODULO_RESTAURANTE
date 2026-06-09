@@ -60,5 +60,18 @@ export function useReviews(restaurantId, initialSort = 'date', size = 5) {
     }
   }
 
-  return { reviews, avgRating, meta, loading, error, sort, handleSortChange, loadMore };
+  function addReview(newReview) {
+    setReviews((prev) => [newReview, ...prev]);
+    setMeta((prev) => ({ ...prev, total: prev.total + 1 }));
+    setAvgRating((prev) => {
+      // Recalcular el promedio localmente
+      const prevTotal = meta.total;
+      const prevAvg = prev || 0;
+      const newTotal = prevTotal + 1;
+      const newAvg = ((prevAvg * prevTotal) + newReview.puntuacion) / newTotal;
+      return newAvg;
+    });
+  }
+
+  return { reviews, avgRating, meta, loading, error, sort, handleSortChange, loadMore, addReview };
 }

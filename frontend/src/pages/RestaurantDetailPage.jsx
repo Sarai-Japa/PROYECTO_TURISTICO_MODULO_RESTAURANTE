@@ -187,11 +187,136 @@ function MenuTab({ tipoComida }) {
 }
 
 // ── Sección de Reseñas ─────────────────────────────────────────────
-function ReviewsTab({ restaurantId }) {
-  const { reviews, avgRating, meta, loading, error, sort, handleSortChange, loadMore } = useReviews(restaurantId);
+
+function ReviewForm({ restaurantId, onReviewAdded, onGoLogin, isAuthenticated }) {
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  if (!isAuthenticated) {
+    return (
+      <div className="bg-orange-50 rounded-xl p-5 mb-6 flex flex-col items-center justify-center text-center">
+        <p className="text-gray-700 font-medium mb-3">Inicia sesión para dejar una reseña</p>
+        <button
+          onClick={onGoLogin}
+          className="px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg transition"
+        >
+          Iniciar sesión
+        </button>
+      </div>
+    );
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    if (rating === 0) {
+      setErrorMsg('Por favor selecciona una calificación.');
+      return;
+    }
+    if (comment.trim().length < 5) {
+      setErrorMsg('El comentario debe tener al menos 5 caracteres.');
+      return;
+    }
+
+    setSubmitting(true);
+    const token = localStorage.getItem('token');
+
+    try {
+      const res = await fetch(`${API_URL}/api/restaurants/${restaurantId}/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ rating, comment })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Error al enviar reseña');
+      }
+
+      setSuccessMsg('¡Gracias por tu reseña!');
+      setRating(0);
+      setComment('');
+      onReviewAdded(data);
+      
+      setTimeout(() => setSuccessMsg(''), 5000);
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 mb-6">
+      <h3 className="font-bold text-gray-900 mb-4">Escribe tu reseña</h3>
+      {errorMsg && <div className="bg-red-50 text-red-600 rounded-lg p-3 text-sm mb-4">{errorMsg}</div>}
+      {successMsg && <div className="bg-green-50 text-green-600 rounded-lg p-3 text-sm mb-4">{successMsg}</div>}
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Calificación</label>
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                className={`text-3xl focus:outline-none transition-colors ${
+                  star <= (hoverRating || rating) ? 'text-yellow-400' : 'text-gray-300'
+                }`}
+                onMouseEnter={() => setHoverRating(star)}
+                onMouseLeave={() => setHoverRating(0)}
+                onClick={() => setRating(star)}
+              >
+                ★
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Comentario</label>
+          <textarea
+            className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            rows="4"
+            placeholder="¿Qué tal estuvo tu experiencia?"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+          ></textarea>
+        </div>
+        <button
+          type="submit"
+          disabled={submitting}
+          className={`px-5 py-2.5 font-bold rounded-lg transition ${
+            submitting
+              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : 'bg-orange-600 hover:bg-orange-700 text-white'
+          }`}
+        >
+          {submitting ? 'Enviando...' : 'Enviar'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function ReviewsTab({ restaurantId, isAuthenticated, onGoLogin }) {
+  const { reviews, avgRating, meta, loading, error, sort, handleSortChange, loadMore, addReview } = useReviews(restaurantId);
 
   return (
     <div>
+      <ReviewForm
+        restaurantId={restaurantId}
+        isAuthenticated={isAuthenticated}
+        onGoLogin={onGoLogin}
+        onReviewAdded={addReview}
+      />
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
         <div>
           {avgRating > 0 && (
@@ -436,7 +561,7 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
       <div className="max-w-4xl mx-auto px-4 py-6">
         {activeTab === 'info'    && <InfoTab    restaurantData={restaurantData} />}
         {activeTab === 'menu'    && <MenuTab    tipoComida={tipo_comida} />}
-        {activeTab === 'reviews' && <ReviewsTab restaurantId={id} />}
+        {activeTab === 'reviews' && <ReviewsTab restaurantId={id} isAuthenticated={isAuthenticated} onGoLogin={onGoLogin} />}
       </div>
     </div>
   );
