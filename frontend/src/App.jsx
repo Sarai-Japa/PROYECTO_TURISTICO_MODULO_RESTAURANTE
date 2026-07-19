@@ -82,7 +82,13 @@ function AppContent() {
         />
       );
     }
-    return <FavoritesPage onBack={() => goTo('restaurants')} />;
+    return (
+      <FavoritesPage
+        onBack={() => goTo('restaurants')}
+        onSelectRestaurant={setSelectedRestaurant}
+        onGoLogin={() => { setReturnTo('favorites'); setPage('login'); }}
+      />
+    );
   }
 
   if (page === 'restaurants') {

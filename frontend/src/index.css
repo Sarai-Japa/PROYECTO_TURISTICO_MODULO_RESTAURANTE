@@ -146,6 +146,14 @@
   border-color: var(--theme-border-light) !important;
 }
 
+.dark .bg-gray-100 {
+  background-color: var(--theme-border-light) !important;
+}
+
+.dark .bg-gray-200 {
+  background-color: var(--theme-border-color) !important;
+}
+
 /* Fix dropdown and form controls in dark mode */
 .dark select, .dark input {
   background-color: var(--theme-bg-base) !important;
