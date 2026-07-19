@@ -1,5 +1,6 @@
 import { Heart, ChefHat, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 // T04 HU11: ruta privada — solo accesible con sesión activa
 export default function FavoritesPage({ onBack }) {
@@ -19,6 +20,7 @@ export default function FavoritesPage({ onBack }) {
             <span className="text-2xl font-bold text-gray-900">FoodHub</span>
           </button>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <span className="text-sm text-gray-600 font-medium">{user?.nombre}</span>
             <button
               onClick={handleLogout}

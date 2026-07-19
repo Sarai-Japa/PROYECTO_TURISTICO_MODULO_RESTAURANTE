@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Tailwind v4 class-based dark mode variant configuration */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -20,6 +23,48 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --radius: 0.625rem;
+
+  /* Theme semantic mappings for dark/light mode transition compatibility */
+  --theme-bg-base: #f9fafb; /* gray-50 */
+  --theme-bg-surface: #ffffff; /* white */
+  --theme-bg-surface-translucent: rgba(255, 255, 255, 0.9);
+  --theme-text-title: #111827; /* gray-900 */
+  --theme-text-body: #374151; /* gray-800 */
+  --theme-text-desc: #4b5563; /* gray-600 */
+  --theme-text-muted: #6b7280; /* gray-500 */
+  --theme-border-color: #e5e7eb; /* gray-200 */
+  --theme-border-light: #f3f4f6; /* gray-100 */
+}
+
+/* Dark mode variable overrides */
+.dark {
+  --background: oklch(0.141 0.005 285.82);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.18 0.008 285.82);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.18 0.008 285.82);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.25 0.008 285.82);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.25 0.008 285.82);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.25 0.008 285.82);
+  --accent-foreground: oklch(0.985 0 0);
+  --border: oklch(0.28 0.008 285.82);
+  --input: oklch(0.28 0.008 285.82);
+  --ring: oklch(0.3 0 0);
+
+  --theme-bg-base: #111827; /* gray-900 */
+  --theme-bg-surface: #1f2937; /* gray-800 */
+  --theme-bg-surface-translucent: rgba(31, 41, 55, 0.9);
+  --theme-text-title: #f9fafb; /* gray-50 */
+  --theme-text-body: #f3f4f6; /* gray-100 */
+  --theme-text-desc: #d1d5db; /* gray-300 */
+  --theme-text-muted: #9ca3af; /* gray-400 */
+  --theme-border-color: #374151; /* gray-700 */
+  --theme-border-light: #1f2937; /* gray-800 */
 }
 
 @layer base {
@@ -28,9 +73,87 @@
     margin: 0;
     padding: 0;
   }
+  
+  /* Apply smooth transition to all container, typography, and interactive components */
+  body, div, nav, main, section, header, button, span, p, h1, h2, h3, h4, h5, h6, select, input, textarea, a {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  }
+
   body {
     background-color: var(--background);
     color: var(--foreground);
     font-family: sans-serif;
   }
+}
+
+/* Custom styles mapping tailwind utility classes for seamless dark mode experience without JSX modification */
+.dark body {
+  background-color: var(--theme-bg-base);
+  color: var(--theme-text-body);
+}
+
+.dark .bg-white {
+  background-color: var(--theme-bg-surface) !important;
+}
+
+.dark .bg-white\/90 {
+  background-color: var(--theme-bg-surface-translucent) !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: var(--theme-bg-base) !important;
+}
+
+.dark .bg-orange-50 {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+.dark .from-orange-50 {
+  --tw-gradient-from: var(--theme-bg-base) !important;
+  --tw-gradient-to: var(--theme-bg-base) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+.dark .text-gray-900 {
+  color: var(--theme-text-title) !important;
+}
+
+.dark .text-gray-800 {
+  color: var(--theme-text-body) !important;
+}
+
+.dark .text-gray-700 {
+  color: var(--theme-text-body) !important;
+}
+
+.dark .text-gray-600 {
+  color: var(--theme-text-desc) !important;
+}
+
+.dark .text-gray-500 {
+  color: var(--theme-text-muted) !important;
+}
+
+.dark .border-gray-200 {
+  border-color: var(--theme-border-color) !important;
+}
+
+.dark .border-gray-100 {
+  border-color: var(--theme-border-light) !important;
+}
+
+.dark .border-gray-50 {
+  border-color: var(--theme-border-light) !important;
+}
+
+/* Fix dropdown and form controls in dark mode */
+.dark select, .dark input {
+  background-color: var(--theme-bg-base) !important;
+  color: var(--theme-text-title) !important;
+  border-color: var(--theme-border-color) !important;
+}
+
+/* Interactive Map Adaptation (Leaflet dark mode theme inversion filter) */
+.dark .leaflet-container {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
 }

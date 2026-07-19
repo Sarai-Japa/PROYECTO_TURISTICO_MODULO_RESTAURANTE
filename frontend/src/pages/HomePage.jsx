@@ -1,4 +1,5 @@
 import { ChefHat, Search, MapPin, MessageSquare, Heart } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 
 const FEATURE_CARDS = [
   {
@@ -44,12 +45,15 @@ export default function HomePage({ onExplore }) {
             <ChefHat className="w-8 h-8 text-orange-500" />
             <span className="text-2xl font-bold text-gray-900">FoodHub</span>
           </div>
-          <button
-            onClick={onExplore}
-            className="px-6 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition cursor-pointer"
-          >
-            Explorar
-          </button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <button
+              onClick={onExplore}
+              className="px-6 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition cursor-pointer"
+            >
+              Explorar
+            </button>
+          </div>
         </div>
       </nav>
 

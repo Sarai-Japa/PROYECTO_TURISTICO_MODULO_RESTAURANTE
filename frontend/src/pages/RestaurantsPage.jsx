@@ -7,6 +7,7 @@ import LocationSearch from '../components/LocationSearch';
 import AmenityFilter from '../components/AmenityFilter';
 import DateFilter from '../components/DateFilter';
 import { useAuth } from '../context/AuthContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 const DAYS_ES   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -66,6 +67,7 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
           </button>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             {isAuthenticated ? (
               <>
                 <span className="text-sm text-gray-600 font-medium hidden sm:inline">
