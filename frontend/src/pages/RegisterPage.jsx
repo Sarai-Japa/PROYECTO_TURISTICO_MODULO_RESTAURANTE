@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChefHat, Eye, EyeOff, UserPlus, Check, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -58,7 +59,10 @@ export default function RegisterPage({ onSuccess, onGoLogin, onBack }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-md">
 
         <div className="text-center mb-8">

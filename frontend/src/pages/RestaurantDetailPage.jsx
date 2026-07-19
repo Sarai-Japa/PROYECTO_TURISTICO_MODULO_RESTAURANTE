@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useReviews } from '../hooks/useReviews';
+import ThemeToggle from '../components/ThemeToggle';
 
 // Fix Leaflet default marker icons with bundlers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -506,21 +507,24 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
           Volver
         </button>
 
-        {/* Botón corazón — HU10-T01/T02 */}
-        <button
-          onClick={handleHeartClick}
-          title={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
-          aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
-          className={`absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full shadow-md
-            transition-all duration-200 cursor-pointer
-            ${isFavorite ? 'bg-red-500 hover:bg-red-600' : 'bg-white/90 hover:bg-white'}
-            ${heartAnim ? 'scale-125' : 'scale-100'}`}
-        >
-          <Heart
-            fill={isFavorite ? 'currentColor' : 'none'}
-            className={`w-5 h-5 transition-colors duration-200 ${isFavorite ? 'text-white' : 'text-gray-600'}`}
-          />
-        </button>
+        {/* Botones superiores derecho */}
+        <div className="absolute top-4 right-4 flex items-center gap-3">
+          <ThemeToggle />
+          <button
+            onClick={handleHeartClick}
+            title={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+            aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+            className={`w-10 h-10 flex items-center justify-center rounded-full shadow-md
+              transition-all duration-200 cursor-pointer
+              ${isFavorite ? 'bg-red-500 hover:bg-red-600' : 'bg-white/90 hover:bg-white'}
+              ${heartAnim ? 'scale-125' : 'scale-100'}`}
+          >
+            <Heart
+              fill={isFavorite ? 'currentColor' : 'none'}
+              className={`w-5 h-5 transition-colors duration-200 ${isFavorite ? 'text-white' : 'text-gray-600'}`}
+            />
+          </button>
+        </div>
 
         <div className="absolute bottom-0 left-0 right-0 px-6 pb-5">
           <h1 className="text-white text-3xl md:text-4xl font-bold drop-shadow-lg">{nombre}</h1>
