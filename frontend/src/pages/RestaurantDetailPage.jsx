@@ -15,6 +15,14 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
+const restaurantIcon = L.divIcon({
+  className: 'restaurant-marker',
+  html: '<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#f97316;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:13px;">🍴</span></div>',
+  iconSize: [28, 28],
+  iconAnchor: [14, 28],
+  popupAnchor: [0, -26],
+});
+
 const DEFAULT_IMG = 'https://images.pexels.com/photos/67468/pexels-photo-67468.jpeg?auto=compress&cs=tinysrgb&w=1200&h=500&fit=crop';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -145,11 +153,24 @@ function InfoTab({ restaurantData, t }) {
               scrollWheelZoom={false}
             >
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                subdomains="abcd"
+                maxZoom={19}
               />
-              <Marker position={[latitud, longitud]}>
-                <Popup>{nombre}{ciudad ? `, ${ciudad}` : ''}</Popup>
+              <Marker position={[latitud, longitud]} icon={restaurantIcon}>
+                <Popup>
+                  <div className="text-center">
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${latitud},${longitud}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-center text-xs py-1.5 px-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition cursor-pointer font-bold block"
+                    >
+                      {t('map:directions') || 'Cómo llegar'}
+                    </a>
+                  </div>
+                </Popup>
               </Marker>
             </MapContainer>
           </div>
@@ -421,7 +442,7 @@ function ReviewsTab({ restaurantId, isAuthenticated, onGoLogin, t, i18n, onAvera
 
 // ── Componente principal ───────────────────────────────────────────
 export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = false, onToggleFavorite, isAuthenticated = false, onGoLogin }) {
-  const { t, i18n } = useTranslation('restaurantDetail');
+  const { t, i18n } = useTranslation(['restaurantDetail', 'map']);
   const { id } = restaurant;
   const [activeTab, setActiveTab]           = useState('info');
   const [loaded, setLoaded]                 = useState(false);
