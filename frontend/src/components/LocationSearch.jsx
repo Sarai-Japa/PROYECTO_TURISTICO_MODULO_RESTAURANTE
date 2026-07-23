@@ -1,11 +1,13 @@
 import { useRef, useEffect } from 'react';
 import { MapPin, Navigation, X, Loader } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useLocationSearch } from '../hooks/useLocationSearch';
 
 const RADIUS_OPTIONS = [1, 5, 10, 25];
 
 export default function LocationSearch({ activeLocation, radius, onLocationChange, onRadiusChange }) {
   const { query, setQuery, suggestions, setSuggestions, loading } = useLocationSearch();
+  const { t } = useTranslation('restaurants');
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function LocationSearch({ activeLocation, radius, onLocationChang
         onLocationChange({
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
-          label: 'Mi ubicación actual',
+          label: t('location.myLocation'),
         });
         setSuggestions([]);
       },
@@ -71,7 +73,7 @@ export default function LocationSearch({ activeLocation, radius, onLocationChang
             <button
               onClick={handleClear}
               className="text-orange-400 hover:text-orange-600 cursor-pointer transition"
-              title="Quitar filtro de ubicación"
+              title={t('location.removeFilter')}
             >
               <X className="w-4 h-4" />
             </button>
@@ -85,12 +87,12 @@ export default function LocationSearch({ activeLocation, radius, onLocationChang
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por ciudad o dirección..."
+            placeholder={t('location.placeholder')}
             className="w-full pl-9 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-500 transition bg-white placeholder-gray-400"
           />
           <button
             onClick={handleUseMyLocation}
-            title="Usar mi ubicación actual"
+            title={t('location.useMyLocation')}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 cursor-pointer transition"
           >
             <Navigation className="w-4 h-4" />
@@ -104,7 +106,7 @@ export default function LocationSearch({ activeLocation, radius, onLocationChang
           {loading ? (
             <div className="flex items-center gap-2 px-4 py-3 text-sm text-gray-500">
               <Loader className="w-4 h-4 animate-spin" />
-              Buscando...
+              {t('location.searching')}
             </div>
           ) : (
             suggestions.map((s, i) => (

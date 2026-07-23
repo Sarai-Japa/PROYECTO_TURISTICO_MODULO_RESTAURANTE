@@ -1,0 +1,39 @@
+{
+  "hero": {
+    "title": "Discover Amazing Restaurants",
+    "subtitle": "Find the best places to eat, read real reviews and save your favorites",
+    "cta": "Start Exploring →"
+  },
+  "features": {
+    "title": "What can you do?",
+    "subtitle": "Everything you need to choose the best place"
+  },
+  "featureCards": {
+    "search": {
+      "title": "Smart Search",
+      "desc": "Search by name, cuisine type or specific dish"
+    },
+    "location": {
+      "title": "Near You",
+      "desc": "Find restaurants by location and distance"
+    },
+    "reviews": {
+      "title": "Real Reviews",
+      "desc": "Read diners' opinions and share your experience"
+    },
+    "favorites": {
+      "title": "Save Favorites",
+      "desc": "Mark places you want to visit again"
+    }
+  },
+  "showcase": {
+    "title": "Places waiting for you",
+    "subtitle": "A sample of what you can discover",
+    "cta": "See all restaurants →"
+  },
+  "cta": {
+    "title": "Ready to explore?",
+    "subtitle": "Hundreds of restaurants with detailed information, reviews and more",
+    "button": "Go to Restaurants"
+  }
+}

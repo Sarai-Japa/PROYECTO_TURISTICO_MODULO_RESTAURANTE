@@ -1,13 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useSearch } from '../hooks/useSearch';
 import { highlightText } from '../utils/highlight';
-
-const TYPE_LABEL = {
-  restaurant: 'Restaurante',
-  cuisine: 'Cocina',
-  dish: 'Plato',
-};
 
 const TYPE_COLOR = {
   restaurant: 'bg-orange-100 text-orange-700',
@@ -25,6 +20,7 @@ function getMatchType(item, query) {
 // T01 + T02: input con debounce 300ms y dropdown de sugerencias
 export default function SearchBar({ onSearch }) {
   const { query, results, loading, error, handleChange } = useSearch();
+  const { t } = useTranslation('restaurants');
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -67,7 +63,7 @@ export default function SearchBar({ onSearch }) {
           <Search className="absolute left-4 text-gray-400 w-5 h-5 pointer-events-none" />
           <input
             type="text"
-            placeholder="Buscar por nombre de restaurante, cocina o plato..."
+            placeholder={t('search.placeholder')}
             value={query}
             maxLength={100}
             onChange={(e) => { handleChange(e); setOpen(true); }}
@@ -79,7 +75,7 @@ export default function SearchBar({ onSearch }) {
               type="button"
               onClick={() => { handleChange({ target: { value: '' } }); setOpen(false); onSearch([], ''); }}
               className="absolute right-4 text-gray-400 hover:text-gray-600 transition cursor-pointer"
-              aria-label="Limpiar búsqueda"
+              aria-label={t('search.clearLabel')}
             >
               <X className="w-4 h-4" />
             </button>
@@ -94,13 +90,13 @@ export default function SearchBar({ onSearch }) {
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
           {query.length < 3 ? (
             <p className="px-4 py-3 text-sm text-gray-500 text-center">
-              Escribe al menos 3 caracteres para ver sugerencias
+              {t('search.minChars')}
             </p>
           ) : loading ? (
-            <p className="px-4 py-3 text-sm text-gray-500 text-center">Buscando...</p>
+            <p className="px-4 py-3 text-sm text-gray-500 text-center">{t('search.loading')}</p>
           ) : suggestions.length === 0 ? (
             <p className="px-4 py-3 text-sm text-gray-500 text-center">
-              Sin resultados para &ldquo;{query}&rdquo;
+              {t('search.noResults', { query })}
             </p>
           ) : (
             <ul>
@@ -122,7 +118,7 @@ export default function SearchBar({ onSearch }) {
                         </span>
                       </div>
                       <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_COLOR[type]}`}>
-                        {TYPE_LABEL[type]}
+                        {t(`search.type.${type}`)}
                       </span>
                     </button>
                   </li>

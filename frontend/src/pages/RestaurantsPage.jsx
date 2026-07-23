@@ -1,25 +1,19 @@
 import { useState } from 'react';
 import { ChefHat, LogIn, LogOut, Heart, AlertCircle, MapPin, Calendar } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import SearchBar from '../components/SearchBar';
 import SearchResults from '../components/SearchResults';
 import RestaurantList from '../components/RestaurantList';
 import LocationSearch from '../components/LocationSearch';
 import AmenityFilter from '../components/AmenityFilter';
 import DateFilter from '../components/DateFilter';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useAuth } from '../context/AuthContext';
-
-const DAYS_ES   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-
-function formatDateShort(dateStr) {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const d   = new Date(year, month - 1, day);
-  const dow = DAYS_ES[d.getDay()];
-  return `${dow.charAt(0).toUpperCase() + dow.slice(1)}, ${day} de ${MONTHS_ES[month - 1]}`;
-}
+import { formatLocaleDateLong } from '../i18n/formatLocaleDate';
 
 export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin, onGoFavorites, favoriteIds = new Set(), onToggleFavorite }) {
   const { user, isAuthenticated, logout } = useAuth();
+  const { t, i18n } = useTranslation('restaurants');
   const [searchResults, setSearchResults] = useState(null);
   const [searchQuery, setSearchQuery]     = useState('');
   const [searchHighlight, setSearchHighlight] = useState(true);
@@ -69,21 +63,21 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
             {isAuthenticated ? (
               <>
                 <span className="text-sm text-gray-600 font-medium hidden sm:inline">
-                  Hola, {user?.nombre}
+                  {t('common:nav.hello', { name: user?.nombre })}
                 </span>
                 <button
                   onClick={onGoFavorites}
                   className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-orange-500 transition cursor-pointer"
                 >
                   <Heart className="w-4 h-4" />
-                  <span className="hidden sm:inline">Favoritos</span>
+                  <span className="hidden sm:inline">{t('common:nav.favorites')}</span>
                 </button>
                 <button
                   onClick={logout}
                   className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-500 transition cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Cerrar sesión</span>
+                  <span className="hidden sm:inline">{t('common:nav.logout')}</span>
                 </button>
               </>
             ) : (
@@ -93,10 +87,11 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
                   className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-orange-500 transition cursor-pointer"
                 >
                   <LogIn className="w-4 h-4" />
-                  Iniciar sesión
+                  {t('common:nav.login')}
                 </button>
               </>
             )}
+            <LanguageSwitcher />
           </div>
         </div>
       </nav>
@@ -105,8 +100,8 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
         <div className="container mx-auto px-4 py-8">
 
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Descubre Restaurantes</h1>
-            <p className="text-gray-600 mb-6">Encuentra los mejores lugares para comer cerca de ti</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('title')}</h1>
+            <p className="text-gray-600 mb-6">{t('subtitle')}</p>
 
             {/* Búsqueda por nombre/tipo */}
             <SearchBar onSearch={handleSearch} />
@@ -115,7 +110,7 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
             <div className="flex items-center gap-3 my-4">
               <div className="flex-1 h-px bg-gray-200" />
               <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">
-                o filtra por ubicación y fecha
+                {t('separator')}
               </span>
               <div className="flex-1 h-px bg-gray-200" />
             </div>
@@ -139,14 +134,14 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
             {selectedDate && !activeLocation && (
               <div className="mt-2 flex items-center gap-2 text-amber-700 text-sm bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>Selecciona una ubicación para combinar ambos filtros y obtener resultados más precisos.</span>
+                <span>{t('warningSelectLocation')}</span>
               </div>
             )}
 
             {/* Badge combinado: ambos filtros activos simultáneamente */}
             {activeLocation && selectedDate && (
               <div className="mt-2 flex items-center gap-2 flex-wrap bg-green-50 border border-green-200 rounded-xl px-3 py-2.5">
-                <span className="text-xs font-semibold text-green-700 uppercase tracking-wide">Filtros combinados</span>
+                <span className="text-xs font-semibold text-green-700 uppercase tracking-wide">{t('combinedFilters')}</span>
                 <div className="flex items-center gap-1.5 text-sm text-green-800">
                   <MapPin className="w-3.5 h-3.5 text-green-600 shrink-0" />
                   <span className="font-medium truncate max-w-[180px]">{activeLocation.label}</span>
@@ -154,13 +149,13 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
                 <span className="text-green-400">·</span>
                 <div className="flex items-center gap-1.5 text-sm text-green-800">
                   <Calendar className="w-3.5 h-3.5 text-green-600 shrink-0" />
-                  <span className="font-medium">{formatDateShort(selectedDate)}</span>
+                  <span className="font-medium">{formatLocaleDateLong(selectedDate, i18n.language)}</span>
                 </div>
                 <button
                   onClick={handleClearBothFilters}
                   className="ml-auto text-xs text-green-600 hover:text-green-800 underline transition cursor-pointer"
                 >
-                  Limpiar ambos
+                  {t('clearBoth')}
                 </button>
               </div>
             )}

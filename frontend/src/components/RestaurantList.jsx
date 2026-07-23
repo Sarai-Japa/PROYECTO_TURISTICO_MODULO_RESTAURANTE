@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, MapPin, Loader } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useRestaurants } from '../hooks/useRestaurants';
 import RestaurantCard from './RestaurantCard';
 import CardSkeleton from './CardSkeleton';
 
-function Pagination({ page, totalPages, onChange }) {
+function Pagination({ page, totalPages, onChange, t }) {
   const pages = [];
   const start = Math.max(1, page - 2);
   const end   = Math.min(totalPages, page + 2);
@@ -17,7 +18,7 @@ function Pagination({ page, totalPages, onChange }) {
         onClick={() => onChange(page - 1)}
         className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-200 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
       >
-        ← Anterior
+        {t('pagination.previous')}
       </button>
 
       {start > 1 && (
@@ -53,7 +54,7 @@ function Pagination({ page, totalPages, onChange }) {
         onClick={() => onChange(page + 1)}
         className="px-3 py-2 rounded-lg text-sm font-medium bg-white border border-gray-200 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
       >
-        Siguiente →
+        {t('pagination.next')}
       </button>
     </div>
   );
@@ -62,6 +63,7 @@ function Pagination({ page, totalPages, onChange }) {
 const SIZE_OPTIONS = [10, 20, 50, 100, 200];
 
 export default function RestaurantList({ onSelect, locationFilter = null, amenities = [], date = null, favoriteIds = new Set(), onToggleFavorite, isAuthenticated = false, onGoLogin }) {
+  const { t } = useTranslation('restaurants');
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(20);
 
@@ -102,7 +104,7 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
       <>
         <div className="flex items-center justify-between mb-4">
           <div className="h-5 w-40 bg-gray-200 rounded animate-pulse" />
-          <SizeSelector size={size} onChange={handleSizeChange} />
+          <SizeSelector size={size} onChange={handleSizeChange} t={t} />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: skeletonCount }).map((_, i) => <CardSkeleton key={i} />)}
@@ -131,20 +133,20 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
                 : <MapPin className="w-8 h-8 text-gray-300" />}
             </div>
             <p className="text-gray-700 font-medium text-lg mb-1">
-              Sin resultados con los filtros aplicados
+              {t('empty.title')}
             </p>
             <p className="text-gray-500 text-sm">
               {locationFilter && date
-                ? `No encontramos restaurantes en ${locationFilter.radius ?? 5} km que abran ese día. Prueba con otra fecha o amplía el radio.`
+                ? t('empty.bothFilters', { radius: locationFilter.radius ?? 5 })
                 : date && !locationFilter
-                  ? 'Ningún restaurante tiene horario registrado para ese día. Prueba con otra fecha.'
+                  ? t('empty.dateOnly')
                   : amenities.length > 0
-                    ? 'Ningún restaurante tiene todas las amenidades seleccionadas. Prueba con menos filtros.'
-                    : `No encontramos restaurantes en un radio de ${locationFilter.radius ?? 5} km. Intenta ampliar el radio.`}
+                    ? t('empty.amenitiesOnly')
+                    : t('empty.locationOnly', { radius: locationFilter.radius ?? 5 })}
             </p>
           </>
         ) : (
-          <p className="text-gray-500 text-lg">No hay restaurantes disponibles</p>
+          <p className="text-gray-500 text-lg">{t('empty.noRestaurants')}</p>
         )}
       </div>
     );
@@ -157,7 +159,7 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
         <div className="absolute top-0 left-0 right-0 flex justify-center z-10 pointer-events-none">
           <div className="flex items-center gap-2 bg-white border border-orange-200 rounded-full px-3 py-1 shadow-sm text-sm text-orange-600 mt-1">
             <Loader className="w-3.5 h-3.5 animate-spin" />
-            <span>Actualizando...</span>
+            <span>{t('list.updating')}</span>
           </div>
         </div>
       )}
@@ -165,13 +167,14 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
       <div className={loading ? 'opacity-50 pointer-events-none' : ''}>
         <div className="flex items-center justify-between mb-4">
           <p className="text-gray-600">
-            {meta.total} restaurante{meta.total !== 1 ? 's' : ''}{' '}
-            {(locationFilter || amenities.length > 0 || date) ? 'encontrado' : 'disponible'}{meta.total !== 1 ? 's' : ''}
+            {(locationFilter || amenities.length > 0 || date)
+              ? t('list.countFound', { count: meta.total, defaultValue: `${meta.total} restaurante${meta.total !== 1 ? 's' : ''} encontrado${meta.total !== 1 ? 's' : ''}` })
+              : t('list.countAvailable', { count: meta.total, defaultValue: `${meta.total} restaurante${meta.total !== 1 ? 's' : ''} disponible${meta.total !== 1 ? 's' : ''}` })}
             {meta.totalPages > 1 && (
-              <span className="text-gray-400 text-sm ml-2">— pág. {effectivePage} de {meta.totalPages}</span>
+              <span className="text-gray-400 text-sm ml-2">— {t('list.page', { current: effectivePage, total: meta.totalPages })}</span>
             )}
           </p>
-          <SizeSelector size={size} onChange={handleSizeChange} />
+          <SizeSelector size={size} onChange={handleSizeChange} t={t} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -189,17 +192,17 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
         </div>
 
         {meta.totalPages > 1 && (
-          <Pagination page={effectivePage} totalPages={meta.totalPages} onChange={setPage} />
+          <Pagination page={effectivePage} totalPages={meta.totalPages} onChange={setPage} t={t} />
         )}
       </div>
     </div>
   );
 }
 
-function SizeSelector({ size, onChange }) {
+function SizeSelector({ size, onChange, t }) {
   return (
     <div className="flex items-center gap-2 text-sm text-gray-600">
-      <span>Mostrar:</span>
+      <span>{t('list.show')}:</span>
       <select
         value={size}
         onChange={(e) => onChange(Number(e.target.value))}

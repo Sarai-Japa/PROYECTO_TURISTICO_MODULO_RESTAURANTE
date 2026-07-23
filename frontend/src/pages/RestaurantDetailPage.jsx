@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, MapPin, Phone, Clock, Globe, Heart } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useTranslation } from 'react-i18next';
 import L from 'leaflet';
 import { useReviews } from '../hooks/useReviews';
+import { formatReviewDate } from '../i18n/formatLocaleDate';
 
 // Fix Leaflet default marker icons with bundlers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -16,7 +18,7 @@ L.Icon.Default.mergeOptions({
 const DEFAULT_IMG = 'https://images.pexels.com/photos/67468/pexels-photo-67468.jpeg?auto=compress&cs=tinysrgb&w=1200&h=500&fit=crop';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
-function Stars({ value }) {
+function Stars({ value, t }) {
   const rating = parseFloat(value) || 0;
   return (
     <div className="flex items-center gap-1">
@@ -24,7 +26,7 @@ function Stars({ value }) {
         {'★'.repeat(Math.round(rating))}{'☆'.repeat(5 - Math.round(rating))}
       </span>
       <span className="text-lg font-bold text-gray-700 ml-1">
-        {rating > 0 ? `${rating.toFixed(1)}/5` : 'Sin puntuación'}
+        {rating > 0 ? `${rating.toFixed(1)}/5` : t('card.noRating')}
       </span>
     </div>
   );
@@ -66,7 +68,7 @@ function getMenu(tipoComida) {
 }
 
 // ── Sección de Información ─────────────────────────────────────────
-function InfoTab({ restaurantData }) {
+function InfoTab({ restaurantData, t }) {
   const { nombre, descripcion, direccion, ciudad, telefono, horario, latitud, longitud, redes_sociales } = restaurantData;
   const hasCoords = latitud != null && longitud != null;
 
@@ -74,13 +76,13 @@ function InfoTab({ restaurantData }) {
     <div className="space-y-5">
       {descripcion && (
         <div className="bg-white rounded-xl p-5 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-2">Acerca de</h2>
+          <h2 className="text-base font-bold text-gray-900 mb-2">{t('tabs.about')}</h2>
           <p className="text-gray-600 leading-relaxed text-sm">{descripcion}</p>
         </div>
       )}
 
       <div className="bg-white rounded-xl p-5 shadow-sm">
-        <h2 className="text-base font-bold text-gray-900 mb-4">Información de contacto</h2>
+        <h2 className="text-base font-bold text-gray-900 mb-4">{t('tabs.contact')}</h2>
         <div className="space-y-3">
           {(direccion || ciudad) && (
             <div className="flex items-start gap-3">
@@ -132,7 +134,7 @@ function InfoTab({ restaurantData }) {
 
       <div className="bg-white rounded-xl overflow-hidden shadow-sm">
         <div className="px-5 py-4 border-b border-gray-50">
-          <h2 className="text-base font-bold text-gray-900">Ubicación</h2>
+          <h2 className="text-base font-bold text-gray-900">{t('tabs.location')}</h2>
         </div>
         {hasCoords ? (
           <div style={{ height: '260px' }}>
@@ -159,7 +161,7 @@ function InfoTab({ restaurantData }) {
               target="_blank" rel="noopener noreferrer"
               className="text-orange-600 hover:underline text-sm cursor-pointer"
             >
-              Ver en Google Maps →
+              {t('buttons.googleMaps')}
             </a>
           </div>
         )}
@@ -187,7 +189,7 @@ function MenuTab({ tipoComida }) {
 }
 
 // ── Sección de Reseñas ─────────────────────────────────────────────
-function ReviewsTab({ restaurantId }) {
+function ReviewsTab({ restaurantId, t, i18n }) {
   const { reviews, avgRating, meta, loading, error, sort, handleSortChange, loadMore } = useReviews(restaurantId);
 
   return (
@@ -201,20 +203,20 @@ function ReviewsTab({ restaurantId }) {
               </span>
               <span className="font-bold text-gray-800">{avgRating.toFixed(1)}/5</span>
               <span className="text-sm text-gray-400">
-                basado en {meta.total} opinión{meta.total !== 1 ? 'es' : ''}
+                {t('reviews.basedOn', { count: meta.total })}
               </span>
             </div>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <label className="text-sm text-gray-500">Ordenar:</label>
+          <label className="text-sm text-gray-500">{t('reviews.sort')}:</label>
           <select
             value={sort}
             onChange={(e) => handleSortChange(e.target.value)}
             className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white cursor-pointer focus:outline-none focus:border-orange-500"
           >
-            <option value="date">Más recientes</option>
-            <option value="rating">Mejor puntuadas</option>
+            <option value="date">{t('reviews.sortDate')}</option>
+            <option value="rating">{t('reviews.sortRating')}</option>
           </select>
         </div>
       </div>
@@ -226,8 +228,8 @@ function ReviewsTab({ restaurantId }) {
       {reviews.length === 0 && !loading && !error && (
         <div className="bg-gray-50 rounded-2xl p-10 text-center border border-dashed border-gray-200">
           <span className="text-4xl block mb-3">💬</span>
-          <p className="text-lg font-bold text-gray-800">Sé el primero en opinar</p>
-          <p className="text-sm text-gray-400 mt-1">Comparte tu experiencia con otros turistas.</p>
+          <p className="text-lg font-bold text-gray-800">{t('reviews.firstOpinion')}</p>
+          <p className="text-sm text-gray-400 mt-1">{t('reviews.shareExperience')}</p>
         </div>
       )}
 
@@ -246,9 +248,7 @@ function ReviewsTab({ restaurantId }) {
                   </span>
                   <span className="text-xs text-gray-400">•</span>
                   <span className="text-xs text-gray-400">
-                    {new Date(r.fecha_creacion).toLocaleDateString('es-ES', {
-                      day: 'numeric', month: 'short', year: 'numeric',
-                    })}
+                    {formatReviewDate(r.fecha_creacion, i18n.language)}
                   </span>
                 </div>
                 {r.comentario && (
@@ -279,7 +279,7 @@ function ReviewsTab({ restaurantId }) {
             onClick={loadMore}
             className="px-6 py-2.5 bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold rounded-xl border border-orange-100 text-sm cursor-pointer transition"
           >
-            Cargar más opiniones
+            {t('reviews.loadMore')}
           </button>
         </div>
       )}
@@ -289,6 +289,7 @@ function ReviewsTab({ restaurantId }) {
 
 // ── Componente principal ───────────────────────────────────────────
 export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = false, onToggleFavorite, isAuthenticated = false, onGoLogin }) {
+  const { t, i18n } = useTranslation('restaurantDetail');
   const { id } = restaurant;
   const [activeTab, setActiveTab]           = useState('info');
   const [loaded, setLoaded]                 = useState(false);
@@ -325,10 +326,10 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
           <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-2xl">404</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Restaurante no encontrado</h2>
-          <p className="text-gray-500 text-sm mb-6">El restaurante que buscas no existe o no está disponible.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('error.notFound')}</h2>
+          <p className="text-gray-500 text-sm mb-6">{t('error.notFoundDesc')}</p>
           <button onClick={onBack} className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition cursor-pointer">
-            Volver al listado
+            {t('buttons.back')}
           </button>
         </div>
       </div>
@@ -340,10 +341,10 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
           <div className="text-4xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Error de conexión</h2>
-          <p className="text-gray-500 text-sm mb-6">No se pudo cargar la información del restaurante.</p>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">{t('error.connectionError')}</h2>
+          <p className="text-gray-500 text-sm mb-6">{t('error.connectionErrorDesc')}</p>
           <button onClick={onBack} className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition cursor-pointer">
-            Volver al listado
+            {t('buttons.back')}
           </button>
         </div>
       </div>
@@ -353,9 +354,9 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
   const { nombre, imagen_url, calificacion, tipo_comida, categoria } = restaurantData;
 
   const TABS = [
-    { key: 'info',    label: 'Información' },
-    { key: 'menu',    label: 'Menú' },
-    { key: 'reviews', label: 'Reseñas' },
+    { key: 'info',    label: t('tabs.info') },
+    { key: 'menu',    label: t('tabs.menu') },
+    { key: 'reviews', label: t('tabs.reviews') },
   ];
 
   return (
@@ -378,14 +379,14 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
           className="absolute top-4 left-4 flex items-center gap-2 bg-white/90 hover:bg-white text-gray-800 px-4 py-2 rounded-lg shadow transition font-medium cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          Volver
+          {t('buttons.back')}
         </button>
 
         {/* Botón corazón — HU10-T01/T02 */}
         <button
           onClick={handleHeartClick}
-          title={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
-          aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+          title={isFavorite ? t('card.removeFavorite') : t('card.addFavorite')}
+          aria-label={isFavorite ? t('card.removeFavorite') : t('card.addFavorite')}
           className={`absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full shadow-md
             transition-all duration-200 cursor-pointer
             ${isFavorite ? 'bg-red-500 hover:bg-red-600' : 'bg-white/90 hover:bg-white'}
@@ -407,7 +408,7 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-between py-3 border-b border-gray-50">
-            <Stars value={calificacion} />
+            <Stars value={calificacion} t={t} />
             {categoria && (
               <span className="text-orange-600 text-xs bg-orange-50 px-3 py-1 rounded-full font-medium">
                 {categoria}
@@ -434,9 +435,9 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
 
       {/* Contenido de la pestaña activa */}
       <div className="max-w-4xl mx-auto px-4 py-6">
-        {activeTab === 'info'    && <InfoTab    restaurantData={restaurantData} />}
+        {activeTab === 'info'    && <InfoTab    restaurantData={restaurantData} t={t} />}
         {activeTab === 'menu'    && <MenuTab    tipoComida={tipo_comida} />}
-        {activeTab === 'reviews' && <ReviewsTab restaurantId={id} />}
+        {activeTab === 'reviews' && <ReviewsTab restaurantId={id} t={t} i18n={i18n} />}
       </div>
     </div>
   );

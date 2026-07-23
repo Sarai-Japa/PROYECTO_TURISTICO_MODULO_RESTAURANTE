@@ -2,6 +2,7 @@ import {
   Wifi, Sun, ParkingCircle, Wind, PawPrint,
   CalendarCheck, Bike, ShoppingBag, Accessibility, Mountain, X,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAmenidades } from '../hooks/useAmenidades';
 
 const ICON = {
@@ -19,6 +20,7 @@ const ICON = {
 
 export default function AmenityFilter({ selected, onChange }) {
   const { amenidades, loading } = useAmenidades();
+  const { t } = useTranslation('restaurants');
 
   if (loading || amenidades.length === 0) return null;
 
@@ -33,7 +35,7 @@ export default function AmenityFilter({ selected, onChange }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-700">Filtrar por amenidades</span>
+        <span className="text-sm font-medium text-gray-700">{t('filters.amenities')}</span>
 
         {selected.length > 0 && (
           <button
@@ -41,7 +43,7 @@ export default function AmenityFilter({ selected, onChange }) {
             className="flex items-center gap-1 text-xs text-orange-600 hover:text-orange-700 cursor-pointer transition"
           >
             <X className="w-3 h-3" />
-            Limpiar filtros
+            {t('filters.clear')}
             <span className="bg-orange-500 text-white rounded-full px-1.5 py-0.5 text-xs font-bold ml-0.5">
               {selected.length}
             </span>

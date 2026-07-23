@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { ChefHat, Eye, EyeOff, UserPlus, Check, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import { mapApiError } from '../i18n/mapApiError';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -16,6 +19,7 @@ function PwdRule({ ok, text }) {
 // T01 HU11: formulario de registro con validación en tiempo real
 export default function RegisterPage({ onSuccess, onGoLogin, onBack }) {
   const { login } = useAuth();
+  const { t } = useTranslation('auth');
   const [nombre, setNombre]     = useState('');
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
@@ -45,20 +49,24 @@ export default function RegisterPage({ onSuccess, onGoLogin, onBack }) {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Error al crear la cuenta');
+        setError(mapApiError(t, data.error) || t('errors.registerFailed'));
         return;
       }
       login(data.token, data.user);
       onSuccess();
     } catch {
-      setError('No se pudo conectar con el servidor');
+      setError(t('errors.networkError'));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4 relative">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
+
       <div className="w-full max-w-md">
 
         <div className="text-center mb-8">
@@ -66,19 +74,19 @@ export default function RegisterPage({ onSuccess, onGoLogin, onBack }) {
             <ChefHat className="w-10 h-10 text-orange-500" />
             <span className="text-3xl font-bold text-gray-900">FoodHub</span>
           </button>
-          <p className="text-gray-500">Crea tu cuenta gratuita</p>
+          <p className="text-gray-500">{t('register.title')}</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('register.name')}</label>
               <input
                 type="text"
                 value={nombre}
                 onChange={(e) => { setNombre(e.target.value); setError(''); }}
-                placeholder="Tu nombre"
+                placeholder={t('register.namePlaceholder')}
                 maxLength={150}
                 autoComplete="name"
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 transition text-base"
@@ -86,12 +94,12 @@ export default function RegisterPage({ onSuccess, onGoLogin, onBack }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('register.email')}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setError(''); }}
-                placeholder="tu@email.com"
+                placeholder={t('register.emailPlaceholder')}
                 autoComplete="email"
                 className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition text-base
                   ${email && !emailValid
@@ -99,18 +107,18 @@ export default function RegisterPage({ onSuccess, onGoLogin, onBack }) {
                     : 'border-gray-200 focus:border-orange-500'}`}
               />
               {email && !emailValid && (
-                <p className="text-xs text-red-500 mt-1">Ingresa un email válido</p>
+                <p className="text-xs text-red-500 mt-1">{t('errors.invalidEmail')}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('register.password')}</label>
               <div className="relative">
                 <input
                   type={showPwd ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); setError(''); }}
-                  placeholder="Crea una contraseña segura"
+                  placeholder={t('register.passwordPlaceholder')}
                   autoComplete="new-password"
                   className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 transition text-base"
                 />
@@ -118,7 +126,7 @@ export default function RegisterPage({ onSuccess, onGoLogin, onBack }) {
                   type="button"
                   onClick={() => setShowPwd(v => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition cursor-pointer"
-                  aria-label={showPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-label={showPwd ? t('register.hidePassword') : t('register.showPassword')}
                 >
                   {showPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -126,9 +134,9 @@ export default function RegisterPage({ onSuccess, onGoLogin, onBack }) {
 
               {password && (
                 <div className="mt-2 space-y-1 pl-1">
-                  <PwdRule ok={pwdLength}    text="Mínimo 8 caracteres" />
-                  <PwdRule ok={pwdUppercase} text="Al menos una mayúscula" />
-                  <PwdRule ok={pwdNumber}    text="Al menos un número" />
+                  <PwdRule ok={pwdLength}    text={t('register.passwordRules.length')} />
+                  <PwdRule ok={pwdUppercase} text={t('register.passwordRules.uppercase')} />
+                  <PwdRule ok={pwdNumber}    text={t('register.passwordRules.number')} />
                 </div>
               )}
             </div>
@@ -145,17 +153,17 @@ export default function RegisterPage({ onSuccess, onGoLogin, onBack }) {
               className="w-full flex items-center justify-center gap-2 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
             >
               <UserPlus className="w-5 h-5" />
-              {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+              {loading ? t('register.buttonLoading') : t('register.button')}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            ¿Ya tienes cuenta?{' '}
+            {t('register.hasAccount')}{' '}
             <button
               onClick={onGoLogin}
               className="text-orange-500 font-medium hover:text-orange-600 transition cursor-pointer"
             >
-              Inicia sesión
+              {t('register.login')}
             </button>
           </p>
         </div>

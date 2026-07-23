@@ -1,14 +1,6 @@
 import { Calendar, X } from 'lucide-react';
-
-const DAYS_ES   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-
-function formatDate(dateStr) {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const d   = new Date(year, month - 1, day);
-  const dow = DAYS_ES[d.getDay()];
-  return `${dow.charAt(0).toUpperCase() + dow.slice(1)}, ${day} de ${MONTHS_ES[month - 1]}`;
-}
+import { useTranslation } from 'react-i18next';
+import { formatLocaleDateLong } from '../i18n/formatLocaleDate';
 
 // T06: usa America/Lima para que min= coincida con la validación del backend
 function todayLima() {
@@ -16,17 +8,18 @@ function todayLima() {
 }
 
 export default function DateFilter({ selected, onChange }) {
+  const { t, i18n } = useTranslation('restaurants');
   const today = todayLima();
 
   if (selected) {
     return (
       <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-xl px-3 py-2">
         <Calendar className="w-4 h-4 text-orange-500 shrink-0" />
-        <span className="text-sm text-orange-700 font-medium">{formatDate(selected)}</span>
+        <span className="text-sm text-orange-700 font-medium">{formatLocaleDateLong(selected, i18n.language)}</span>
         <button
           onClick={() => onChange(null)}
           className="text-orange-400 hover:text-orange-600 cursor-pointer transition"
-          aria-label="Quitar filtro de fecha"
+          aria-label={t('filters.removeDate')}
         >
           <X className="w-4 h-4" />
         </button>

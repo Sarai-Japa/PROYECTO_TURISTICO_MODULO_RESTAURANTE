@@ -1,0 +1,18 @@
+{
+  "language": {
+    "es": "Spanish",
+    "en": "English",
+    "switchTo": "Switch to {{lang}}"
+  },
+  "nav": {
+    "explore": "Explore",
+    "favorites": "Favorites",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "hello": "Hello, {{name}}"
+  },
+  "footer": {
+    "copyright": "© 2025 FoodHub — Restaurants Module.",
+    "description": "Part of a tourism and gastronomy marketplace"
+  }
+}

@@ -1,9 +1,12 @@
 import { Heart, ChefHat, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 // T04 HU11: ruta privada — solo accesible con sesión activa
 export default function FavoritesPage({ onBack }) {
   const { user, logout } = useAuth();
+  const { t } = useTranslation('favorites');
 
   function handleLogout() {
     logout();
@@ -25,8 +28,9 @@ export default function FavoritesPage({ onBack }) {
               className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-500 transition cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
-              Cerrar sesión
+              {t('common:nav.logout')}
             </button>
+            <LanguageSwitcher />
           </div>
         </div>
       </nav>
@@ -34,9 +38,9 @@ export default function FavoritesPage({ onBack }) {
       <main className="min-h-screen bg-gradient-to-br from-orange-50 to-white">
         <div className="container mx-auto px-4 py-20 text-center">
           <Heart className="w-16 h-16 text-orange-300 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Mis Favoritos</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('title')}</h1>
           <p className="text-gray-500 max-w-md mx-auto">
-            Próximamente podrás guardar y gestionar tus restaurantes favoritos aquí.
+            {t('message')}
           </p>
         </div>
       </main>

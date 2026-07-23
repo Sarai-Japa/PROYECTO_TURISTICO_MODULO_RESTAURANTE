@@ -1,0 +1,75 @@
+{
+  "title": "Discover Restaurants",
+  "subtitle": "Find the best places to eat near you",
+  "separator": "or filter by location and date",
+  "warningSelectLocation": "Select a location to combine both filters and get more accurate results.",
+  "combinedFilters": "Combined filters",
+  "clearBoth": "Clear both",
+
+  "search": {
+    "placeholder": "Search by restaurant name, cuisine or dish...",
+    "clearLabel": "Clear search",
+    "minChars": "Type at least 3 characters to see suggestions",
+    "loading": "Searching...",
+    "noResults": "No results for \"{{query}}\"",
+    "type": {
+      "restaurant": "Restaurant",
+      "cuisine": "Cuisine",
+      "dish": "Dish"
+    }
+  },
+
+  "filters": {
+    "amenities": "Filter by amenities",
+    "clear": "Clear filters",
+    "removeDate": "Remove date filter"
+  },
+
+  "location": {
+    "myLocation": "My current location",
+    "placeholder": "Search by city or address...",
+    "useMyLocation": "Use my current location",
+    "removeFilter": "Remove location filter",
+    "searching": "Searching..."
+  },
+
+  "card": {
+    "noRating": "No rating",
+    "addFavorite": "Save to favorites",
+    "removeFavorite": "Remove from favorites",
+    "noLocation": "Location not available",
+    "viewDetail": "View Detail →"
+  },
+
+  "list": {
+    "updating": "Updating...",
+    "countAvailable_one": "{{count}} restaurant available",
+    "countAvailable_other": "{{count}} restaurants available",
+    "countFound_one": "{{count}} restaurant found",
+    "countFound_other": "{{count}} restaurants found",
+    "page": "page {{current}} of {{total}}",
+    "show": "Show"
+  },
+
+  "empty": {
+    "title": "No results with the applied filters",
+    "bothFilters": "We couldn't find restaurants within {{radius}} km that are open that day. Try another date or expand the radius.",
+    "dateOnly": "No restaurant has a schedule registered for that day. Try another date.",
+    "amenitiesOnly": "No restaurant has all the selected amenities. Try with fewer filters.",
+    "locationOnly": "We couldn't find restaurants within {{radius}} km radius. Try expanding the radius.",
+    "noRestaurants": "No restaurants available"
+  },
+
+  "pagination": {
+    "previous": "← Previous",
+    "next": "Next →"
+  },
+
+  "searchResults": {
+    "empty": "We couldn't find restaurants matching your search",
+    "tryAnother": "Try with another term",
+    "clear": "Clear search",
+    "count_one": "{{count}} restaurant found",
+    "count_other": "{{count}} restaurants found"
+  }
+}

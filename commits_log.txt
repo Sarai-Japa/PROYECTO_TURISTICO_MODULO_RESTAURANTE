@@ -1,0 +1,46 @@
+1a31683|2026-05-29 12:21:17 -0500|Clderon| (HEAD -> main, origin/main, origin/HEAD)|Merge pull request #18 from Sarai-Japa/test/HU10-T07-qa-favoritos
+e2fa192|2026-05-29 12:20:01 -0500|Clderon| (origin/test/HU10-T07-qa-favoritos, test/HU10-T07-qa-favoritos)|HU10-T07 (test): QA integral del flujo de favoritos (agregar, eliminar, listar y duplicados)
+fc28b96|2026-05-29 12:15:31 -0500|Clderon||Merge pull request #17 from Sarai-Japa/feature/HU10-T06-tabla-user-favorites
+5512bca|2026-05-29 12:14:17 -0500|Clderon| (origin/feature/HU10-T06-tabla-user-favorites, feature/HU10-T06-tabla-user-favorites)|HU10-T06: Crear tabla pivote user_favorites para la relacion usuario-restaurante
+6b8cd0d|2026-05-29 12:07:23 -0500|Clderon||Merge pull request #16 from Sarai-Japa/feature/HU10-T05-endpoint-listar-favoritos
+0af37b6|2026-05-29 12:06:12 -0500|Clderon| (origin/feature/HU10-T05-endpoint-listar-favoritos, feature/HU10-T05-endpoint-listar-favoritos)|HU10-T05: Implementar endpoint GET para obtener la lista de favoritos del usuario
+539d153|2026-05-29 12:01:31 -0500|Clderon||Merge pull request #15 from Sarai-Japa/feature/HU10-T04-endpoint-eliminar-favorito
+b176533|2026-05-29 12:00:28 -0500|Clderon| (origin/feature/HU10-T04-endpoint-eliminar-favorito, feature/HU10-T04-endpoint-eliminar-favorito)|HU10-T04: Implementar endpoint DELETE para remover restaurante de favoritos
+0b7a59e|2026-05-29 11:57:23 -0500|Clderon||Merge pull request #14 from Sarai-Japa/feature/HU10-T03-endpoint-agregar-favorito
+4c94b28|2026-05-29 11:55:59 -0500|Clderon| (origin/feature/HU10-T03-endpoint-agregar-favorito, feature/HU10-T03-endpoint-agregar-favorito)|HU10-T03: Certificar contrato del endpoint de favoritos con 18 pruebas unitarias automatizadas
+3544da9|2026-05-29 11:49:09 -0500|Clderon||Merge pull request #13 from Sarai-Japa/feature/HU10-T02-estado-visual-corazon
+fcabc1a|2026-05-29 11:47:59 -0500|Clderon| (origin/feature/HU10-T02-estado-visual-corazon, feature/HU10-T02-estado-visual-corazon)|HU10-T02: Implementar logica de estado para alternar corazon lleno y vacio
+41f9aef|2026-05-29 11:41:07 -0500|Clderon||Merge pull request #12 from Sarai-Japa/feature/HU10-T01-boton-corazon
+3f643e5|2026-05-29 11:39:25 -0500|Clderon| (origin/feature/HU10-T01-boton-corazon, feature/HU10-T01-boton-corazon)|HU10-T01: Implementar boton de favoritos (corazon) en tarjetas y perfil del restaurante
+de01de3|2026-05-29 07:20:51 -0500|Clderon||Merge pull request #11 from Sarai-Japa/test/HU04-T07-qa-combinacion-filtros
+f55782b|2026-05-29 07:19:55 -0500|Clderon| (origin/test/HU04-T07-qa-combinacion-filtros, test/HU04-T07-qa-combinacion-filtros)|HU04-T07 (test): QA y validacion de todas las combinaciones de filtros
+be799ce|2026-05-29 07:14:50 -0500|Clderon||Merge pull request #10 from Sarai-Japa/feature/HU04-T06-paginacion-filtros
+d5603ff|2026-05-29 07:13:48 -0500|Clderon| (origin/feature/HU04-T06-paginacion-filtros, feature/HU04-T06-paginacion-filtros)|HU04-T06: Sincronizar paginacion con filtros simultaneos evitando double-fetch
+1d70019|2026-05-29 07:02:18 -0500|Clderon||Merge pull request #9 from Sarai-Japa/perf/HU04-T05-optimizar-query
+6e72511|2026-05-29 07:01:14 -0500|Clderon| (origin/perf/HU04-T05-optimizar-query, perf/HU04-T05-optimizar-query)|HU04-T05 (perf): Aplicar covering indexes y VACUUM ANALYZE para consultas sub-milisegundo
+978630a|2026-05-29 06:52:22 -0500|Clderon||Merge pull request #8 from Sarai-Japa/feature/HU04-T04-endpoint-ubicacion-fecha
+1382091|2026-05-29 06:50:51 -0500|Clderon| (origin/feature/HU04-T04-endpoint-ubicacion-fecha, feature/HU04-T04-endpoint-ubicacion-fecha)|HU04-T04: Crear endpoint para combinar parametros de ubicacion y fecha
+16290dc|2026-05-29 06:42:20 -0500|Clderon||Merge pull request #7 from Sarai-Japa/feature/HU04-T03-actualizacion-dinamica
+cec1daa|2026-05-29 06:40:57 -0500|Clderon| (origin/feature/HU04-T03-actualizacion-dinamica, feature/HU04-T03-actualizacion-dinamica)|HU04-T03: Actualizacion dinamica mediante fetch combinando parametros de ubicacion y fecha
+d3d3fdb|2026-05-29 06:35:56 -0500|Clderon||Merge pull request #6 from Sarai-Japa/feature/HU04-T02-filtros-activos
+8aad534|2026-05-29 06:34:47 -0500|Clderon| (origin/feature/HU04-T02-filtros-activos, feature/HU04-T02-filtros-activos)|HU04-T02: Mantener y mostrar filtros activos de ubicacion y fecha en la UI
+c031bfe|2026-05-29 06:28:07 -0500|Clderon||Merge pull request #5 from Sarai-Japa/feature/HU04-T01-ui-ubicacion-fecha
+e9101ac|2026-05-29 06:27:00 -0500|Clderon| (origin/feature/HU04-T01-ui-ubicacion-fecha, feature/HU04-T01-ui-ubicacion-fecha)|HU04-T01: Implementar UI para filtros simultaneos de ubicacion y fecha
+aa04f49|2026-05-26 12:36:43 -0500|Clderon||Merge pull request #4 from Sarai-Japa/chore/mejora-datos-seed
+68b68da|2026-05-26 12:35:37 -0500|Clderon| (origin/chore/mejora-datos-seed, chore/mejora-datos-seed)|chore: Localizar datos generados en el seed (contexto peruano y español)
+3df846b|2026-05-26 12:08:16 -0500|Clderon||Merge pull request #3 from Sarai-Japa/fix/HU01-T03-bug-resaltado
+3ccdeb5|2026-05-26 12:02:49 -0500|Clderon| (origin/fix/HU01-T03-bug-resaltado, fix/HU01-T03-bug-resaltado)|T03 (fix): Quitar resaltado de texto al seleccionar sugerencia exacta
+4e24192|2026-05-26 11:41:42 -0500|Clderon||Merge pull request #2 from Sarai-Japa/test/H-06-T06-qa-carga-masiva
+af1df2c|2026-05-26 11:38:23 -0500|Clderon| (origin/test/H-06-T06-qa-carga-masiva, test/H-06-T06-qa-carga-masiva)|T06: Agregar pruebas unitarias para carga masiva de 100+ restaurantes
+89b24fe|2026-05-26 11:12:42 -0500|Clderon||Merge pull request #1 from Sarai-Japa/feature/HU01-T02-dropdown-sugerencias
+c70af12|2026-05-26 10:57:43 -0500|Clderon| (origin/feature/HU01-T02-dropdown-sugerencias, feature/HU01-T02-dropdown-sugerencias)|T02: Corregir handleSelect para autocompletar input con la sugerencia seleccionada
+4106c8a|2026-05-22 12:44:12 -0500|Clderon||feat(auth): implementar HU03 y HU11 — filtro por fecha y autenticación JWT
+715ea76|2026-05-22 02:56:26 -0500|Clderon||feat: implement location search, amenity filters, and seed improvements
+5b54261|2026-05-22 02:34:23 -0500|Clderon||feat(restaurants): implement amenity filtering system for HU05
+15a0e69|2026-05-22 02:04:17 -0500|Clderon||feat(restaurants): implement location-based search for HU02
+34ee0ef|2026-05-19 15:41:04 -0500|Clderon||feat(restaurants): implement HU07 detail view, review avg rating, and seed scripts
+1207f15|2026-05-19 13:52:00 -0500|frank-henrry||Merge branch 'main' of https://github.com/Sarai-Japa/PROYECTO_TURISTICO_MODULO_RESTAURANTE
+dac0c38|2026-05-19 13:48:38 -0500|frank-henrry||feat:  - T04  - T03  - T01  - T09  - T08  - T07  - T01  - HU08 CON SUS SUBTAREAS
+6521a26|2026-05-19 12:53:46 -0500|Clderon||feat(restaurants): add page size selector, fix reload navigation and cursor styles
+644aef0|2026-05-17 11:33:34 -0500|Clderon||feat: implementar módulo de restaurantes y buscador [PROY-6] [PROY-1]
+e118209|2026-05-15 11:15:49 -0500|Sarai-Japa||Initial commit

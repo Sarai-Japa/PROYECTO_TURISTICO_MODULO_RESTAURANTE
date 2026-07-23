@@ -1,0 +1,39 @@
+{
+  "hero": {
+    "title": "Descubre Restaurantes Increíbles",
+    "subtitle": "Encuentra los mejores lugares para comer, lee reseñas reales y guarda tus favoritos",
+    "cta": "Comenzar a Explorar →"
+  },
+  "features": {
+    "title": "¿Qué puedes hacer?",
+    "subtitle": "Todo lo que necesitas para elegir el mejor lugar"
+  },
+  "featureCards": {
+    "search": {
+      "title": "Búsqueda Inteligente",
+      "desc": "Busca por nombre, tipo de cocina o plato específico"
+    },
+    "location": {
+      "title": "Cerca de Ti",
+      "desc": "Encuentra restaurantes por ubicación y distancia"
+    },
+    "reviews": {
+      "title": "Reseñas Reales",
+      "desc": "Lee opiniones de comensales y comparte tu experiencia"
+    },
+    "favorites": {
+      "title": "Guarda Favoritos",
+      "desc": "Marca los lugares que quieres volver a visitar"
+    }
+  },
+  "showcase": {
+    "title": "Lugares que te esperan",
+    "subtitle": "Una muestra de lo que puedes descubrir",
+    "cta": "Ver todos los restaurantes →"
+  },
+  "cta": {
+    "title": "¿Listo para explorar?",
+    "subtitle": "Cientos de restaurantes con información detallada, reseñas y más",
+    "button": "Ir a Restaurantes"
+  }
+}

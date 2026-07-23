@@ -1,0 +1,75 @@
+{
+  "title": "Descubre Restaurantes",
+  "subtitle": "Encuentra los mejores lugares para comer cerca de ti",
+  "separator": "o filtra por ubicación y fecha",
+  "warningSelectLocation": "Selecciona una ubicación para combinar ambos filtros y obtener resultados más precisos.",
+  "combinedFilters": "Filtros combinados",
+  "clearBoth": "Limpiar ambos",
+
+  "search": {
+    "placeholder": "Buscar por nombre de restaurante, cocina o plato...",
+    "clearLabel": "Limpiar búsqueda",
+    "minChars": "Escribe al menos 3 caracteres para ver sugerencias",
+    "loading": "Buscando...",
+    "noResults": "Sin resultados para \"{{query}}\"",
+    "type": {
+      "restaurant": "Restaurante",
+      "cuisine": "Cocina",
+      "dish": "Plato"
+    }
+  },
+
+  "filters": {
+    "amenities": "Filtrar por amenidades",
+    "clear": "Limpiar filtros",
+    "removeDate": "Quitar filtro de fecha"
+  },
+
+  "location": {
+    "myLocation": "Mi ubicación actual",
+    "placeholder": "Buscar por ciudad o dirección...",
+    "useMyLocation": "Usar mi ubicación actual",
+    "removeFilter": "Quitar filtro de ubicación",
+    "searching": "Buscando..."
+  },
+
+  "card": {
+    "noRating": "Sin puntuación",
+    "addFavorite": "Guardar en favoritos",
+    "removeFavorite": "Quitar de favoritos",
+    "noLocation": "Ubicación no disponible",
+    "viewDetail": "Ver Detalle →"
+  },
+
+  "list": {
+    "updating": "Actualizando...",
+    "countAvailable_one": "{{count}} restaurante disponible",
+    "countAvailable_other": "{{count}} restaurantes disponibles",
+    "countFound_one": "{{count}} restaurante encontrado",
+    "countFound_other": "{{count}} restaurantes encontrados",
+    "page": "pág. {{current}} de {{total}}",
+    "show": "Mostrar"
+  },
+
+  "empty": {
+    "title": "Sin resultados con los filtros aplicados",
+    "bothFilters": "No encontramos restaurantes en {{radius}} km que abran ese día. Prueba con otra fecha o amplía el radio.",
+    "dateOnly": "Ningún restaurante tiene horario registrado para ese día. Prueba con otra fecha.",
+    "amenitiesOnly": "Ningún restaurante tiene todas las amenidades seleccionadas. Prueba con menos filtros.",
+    "locationOnly": "No encontramos restaurantes en un radio de {{radius}} km. Intenta ampliar el radio.",
+    "noRestaurants": "No hay restaurantes disponibles"
+  },
+
+  "pagination": {
+    "previous": "← Anterior",
+    "next": "Siguiente →"
+  },
+
+  "searchResults": {
+    "empty": "No encontramos restaurantes que coincidan con tu búsqueda",
+    "tryAnother": "Intenta con otro término",
+    "clear": "Limpiar búsqueda",
+    "count_one": "{{count}} restaurante encontrado",
+    "count_other": "{{count}} restaurantes encontrados"
+  }
+}

@@ -1,0 +1,19 @@
+1a31683|2026-05-29 12:21:17 -0500|Clderon| (HEAD -> main, origin/main, origin/HEAD)|Merge pull request #18 from Sarai-Japa/test/HU10-T07-qa-favoritos
+fc28b96|2026-05-29 12:15:31 -0500|Clderon||Merge pull request #17 from Sarai-Japa/feature/HU10-T06-tabla-user-favorites
+6b8cd0d|2026-05-29 12:07:23 -0500|Clderon||Merge pull request #16 from Sarai-Japa/feature/HU10-T05-endpoint-listar-favoritos
+539d153|2026-05-29 12:01:31 -0500|Clderon||Merge pull request #15 from Sarai-Japa/feature/HU10-T04-endpoint-eliminar-favorito
+0b7a59e|2026-05-29 11:57:23 -0500|Clderon||Merge pull request #14 from Sarai-Japa/feature/HU10-T03-endpoint-agregar-favorito
+3544da9|2026-05-29 11:49:09 -0500|Clderon||Merge pull request #13 from Sarai-Japa/feature/HU10-T02-estado-visual-corazon
+41f9aef|2026-05-29 11:41:07 -0500|Clderon||Merge pull request #12 from Sarai-Japa/feature/HU10-T01-boton-corazon
+de01de3|2026-05-29 07:20:51 -0500|Clderon||Merge pull request #11 from Sarai-Japa/test/HU04-T07-qa-combinacion-filtros
+be799ce|2026-05-29 07:14:50 -0500|Clderon||Merge pull request #10 from Sarai-Japa/feature/HU04-T06-paginacion-filtros
+1d70019|2026-05-29 07:02:18 -0500|Clderon||Merge pull request #9 from Sarai-Japa/perf/HU04-T05-optimizar-query
+978630a|2026-05-29 06:52:22 -0500|Clderon||Merge pull request #8 from Sarai-Japa/feature/HU04-T04-endpoint-ubicacion-fecha
+16290dc|2026-05-29 06:42:20 -0500|Clderon||Merge pull request #7 from Sarai-Japa/feature/HU04-T03-actualizacion-dinamica
+d3d3fdb|2026-05-29 06:35:56 -0500|Clderon||Merge pull request #6 from Sarai-Japa/feature/HU04-T02-filtros-activos
+c031bfe|2026-05-29 06:28:07 -0500|Clderon||Merge pull request #5 from Sarai-Japa/feature/HU04-T01-ui-ubicacion-fecha
+aa04f49|2026-05-26 12:36:43 -0500|Clderon||Merge pull request #4 from Sarai-Japa/chore/mejora-datos-seed
+3df846b|2026-05-26 12:08:16 -0500|Clderon||Merge pull request #3 from Sarai-Japa/fix/HU01-T03-bug-resaltado
+4e24192|2026-05-26 11:41:42 -0500|Clderon||Merge pull request #2 from Sarai-Japa/test/H-06-T06-qa-carga-masiva
+89b24fe|2026-05-26 11:12:42 -0500|Clderon||Merge pull request #1 from Sarai-Japa/feature/HU01-T02-dropdown-sugerencias
+1207f15|2026-05-19 13:52:00 -0500|frank-henrry||Merge branch 'main' of https://github.com/Sarai-Japa/PROYECTO_TURISTICO_MODULO_RESTAURANTE

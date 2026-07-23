@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Utensils, Heart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { highlightText } from '../utils/highlight';
 
-function HeartButton({ restaurantId, isFavorite, onToggleFavorite, isAuthenticated, onGoLogin }) {
+function HeartButton({ restaurantId, isFavorite, onToggleFavorite, isAuthenticated, onGoLogin, t }) {
   const [animating, setAnimating] = useState(false);
 
   function handleClick(e) {
@@ -16,8 +17,8 @@ function HeartButton({ restaurantId, isFavorite, onToggleFavorite, isAuthenticat
   return (
     <button
       onClick={handleClick}
-      title={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
-      aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+      title={isFavorite ? t('card.removeFavorite') : t('card.addFavorite')}
+      aria-label={isFavorite ? t('card.removeFavorite') : t('card.addFavorite')}
       className={`absolute top-2.5 right-2.5 w-8 h-8 flex items-center justify-center rounded-full shadow-md
         transition-all duration-200 cursor-pointer
         ${isFavorite ? 'bg-red-500 hover:bg-red-600' : 'bg-white/90 hover:bg-white'}
@@ -33,22 +34,23 @@ function HeartButton({ restaurantId, isFavorite, onToggleFavorite, isAuthenticat
 
 // T03: tarjetas de resultado con coincidencias resaltadas — diseño del prototipo
 export default function SearchResults({ results, query, highlight = true, onSelect, onClear, favoriteIds = new Set(), onToggleFavorite, isAuthenticated = false, onGoLogin }) {
+  const { t } = useTranslation('restaurants');
   if (!query) return null;
 
   if (results.length === 0) {
     return (
       <div className="text-center py-16 bg-white rounded-xl shadow-sm">
         <p className="text-gray-500 text-lg mb-2">
-          No encontramos restaurantes que coincidan con tu búsqueda
+          {t('searchResults.empty')}
         </p>
         <p className="text-gray-400 text-sm mb-6">
-          Intenta con otro término
+          {t('searchResults.tryAnother')}
         </p>
         <button
           onClick={onClear}
           className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium"
         >
-          Limpiar búsqueda
+          {t('searchResults.clear')}
         </button>
       </div>
     );
@@ -57,7 +59,7 @@ export default function SearchResults({ results, query, highlight = true, onSele
   return (
     <div>
       <p className="text-gray-600 mb-4">
-        {results.length} restaurante{results.length !== 1 ? 's' : ''} encontrado{results.length !== 1 ? 's' : ''}
+        {t('searchResults.count', { count: results.length })}
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -87,6 +89,7 @@ export default function SearchResults({ results, query, highlight = true, onSele
                 onToggleFavorite={onToggleFavorite}
                 isAuthenticated={isAuthenticated}
                 onGoLogin={onGoLogin}
+                t={t}
               />
             </div>
 

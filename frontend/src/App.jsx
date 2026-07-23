@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useFavorites } from './hooks/useFavorites';
 import HomePage from './pages/HomePage';
@@ -21,6 +21,16 @@ function AppContent() {
   const [page, setPage]                             = useState(getInitialPage);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [returnTo, setReturnTo]                     = useState('restaurants');
+
+  // Sincronizar estado con cambios de hash (flechas del navegador)
+  useEffect(() => {
+    const handleHashChange = () => {
+      setPage(getInitialPage());
+      setSelectedRestaurant(null);
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   function goTo(dest) {
     const hashes = { restaurants: '#restaurantes', favorites: '#favoritos', home: '' };

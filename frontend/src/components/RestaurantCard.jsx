@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { MapPin, Heart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const DEFAULT_IMG = 'https://images.pexels.com/photos/67468/pexels-photo-67468.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop';
 
-function Stars({ value }) {
+function Stars({ value, t }) {
   const rating = parseFloat(value) || 0;
   return (
     <div className="flex items-center gap-1">
@@ -15,7 +16,7 @@ function Stars({ value }) {
         ))}
       </div>
       <span className="text-sm text-gray-600 ml-0.5">
-        {rating > 0 ? rating.toFixed(1) : 'Sin puntuación'}
+        {rating > 0 ? rating.toFixed(1) : t('card.noRating')}
       </span>
     </div>
   );
@@ -24,6 +25,7 @@ function Stars({ value }) {
 // T01: tarjeta de restaurante — imagen, nombre, calificación (estrellas), ubicación
 export default function RestaurantCard({ restaurant, onClick, isFavorite = false, onToggleFavorite, isAuthenticated = false, onGoLogin }) {
   const { nombre, imagen_url, calificacion, ciudad, tipo_comida } = restaurant;
+  const { t } = useTranslation('restaurants');
   const [loaded, setLoaded] = useState(false);
   const [animating, setAnimating] = useState(false);
 
@@ -61,8 +63,8 @@ export default function RestaurantCard({ restaurant, onClick, isFavorite = false
         {/* Botón corazón — HU10-T01/T02 */}
         <button
           onClick={handleHeartClick}
-          title={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
-          aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+          title={isFavorite ? t('card.removeFavorite') : t('card.addFavorite')}
+          aria-label={isFavorite ? t('card.removeFavorite') : t('card.addFavorite')}
           className={`absolute top-2.5 right-2.5 w-8 h-8 flex items-center justify-center rounded-full shadow-md
             transition-all duration-200 cursor-pointer
             ${isFavorite ? 'bg-red-500 hover:bg-red-600' : 'bg-white/90 hover:bg-white'}
@@ -87,19 +89,19 @@ export default function RestaurantCard({ restaurant, onClick, isFavorite = false
 
         {/* Calificación */}
         <div className="mb-2">
-          <Stars value={calificacion} />
+          <Stars value={calificacion} t={t} />
         </div>
 
         {/* Ubicación */}
         <div className="flex items-center gap-1 text-sm text-gray-500">
           <MapPin className="w-3.5 h-3.5 text-orange-500 shrink-0" />
-          <span className="truncate">{ciudad || 'Ubicación no disponible'}</span>
+          <span className="truncate">{ciudad || t('card.noLocation')}</span>
         </div>
       </div>
 
       <div className="px-4 pb-4">
         <button className="w-full py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium text-sm cursor-pointer">
-          Ver Detalle →
+          {t('card.viewDetail')}
         </button>
       </div>
     </div>

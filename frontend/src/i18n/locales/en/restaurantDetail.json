@@ -1,0 +1,39 @@
+{
+  "tabs": {
+    "info": "Information",
+    "menu": "Menu",
+    "reviews": "Reviews",
+    "about": "About",
+    "contact": "Contact Information",
+    "location": "Location"
+  },
+
+  "card": {
+    "noRating": "No rating",
+    "addFavorite": "Save to favorites",
+    "removeFavorite": "Remove from favorites"
+  },
+
+  "buttons": {
+    "back": "Back",
+    "googleMaps": "View on Google Maps →"
+  },
+
+  "reviews": {
+    "basedOn_one": "based on {{count}} review",
+    "basedOn_other": "based on {{count}} reviews",
+    "sort": "Sort",
+    "sortDate": "Most recent",
+    "sortRating": "Best rated",
+    "firstOpinion": "Be the first to review",
+    "shareExperience": "Share your experience with other tourists.",
+    "loadMore": "Load more reviews"
+  },
+
+  "error": {
+    "notFound": "Restaurant not found",
+    "notFoundDesc": "The restaurant you're looking for doesn't exist or is not available.",
+    "connectionError": "Connection error",
+    "connectionErrorDesc": "Could not load restaurant information."
+  }
+}
