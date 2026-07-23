@@ -1,5 +1,7 @@
 const { Router } = require('express');
 const pool = require('../db');
+const requireAuth = require('../middleware/auth');
+const xss = require('xss');
 
 const router = Router();
 
@@ -247,6 +249,77 @@ router.get('/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al obtener el detalle del restaurante' });
+  }
+});
+
+// POST /api/restaurants/:id/reviews
+router.post('/:id/reviews', requireAuth, async (req, res) => {
+  const restaurantId = parseInt(req.params.id);
+  if (isNaN(restaurantId)) {
+    return res.status(400).json({ error: 'ID de restaurante inválido' });
+  }
+
+  const { rating, comment } = req.body;
+  const userId = req.user.id;
+  const userName = req.user.nombre;
+
+  // Validación
+  if (!rating || rating < 1 || rating > 5) {
+    return res.status(400).json({ error: 'La calificación debe ser entre 1 y 5' });
+  }
+  if (!comment || typeof comment !== 'string' || comment.trim().length < 5) {
+    return res.status(400).json({ error: 'El comentario debe tener al menos 5 caracteres' });
+  }
+  if (comment.length > 500) {
+    return res.status(400).json({ error: 'El comentario no debe exceder los 500 caracteres' });
+  }
+
+  const cleanComment = xss(comment.trim());
+
+  try {
+    // Verificar que el restaurante exista
+    const restCheck = await pool.query('SELECT id FROM restaurantes WHERE id = $1', [restaurantId]);
+    if (restCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Restaurante no encontrado' });
+    }
+
+    // Verificar si ya opinó
+    const userCheck = await pool.query(
+      'SELECT id FROM reseñas WHERE restaurante_id = $1 AND usuario_id = $2',
+      [restaurantId, userId]
+    );
+    if (userCheck.rows.length > 0) {
+      return res.status(400).json({ error: 'Ya opinaste sobre este restaurante' });
+    }
+
+    // Usar transacción para insertar reseña y actualizar promedio
+    await pool.query('BEGIN');
+
+    const insertRes = await pool.query(
+      `INSERT INTO reseñas (restaurante_id, usuario_id, usuario_nombre, puntuacion, comentario)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id, restaurante_id, usuario_id, usuario_nombre, puntuacion, comentario, fecha_creacion`,
+      [restaurantId, userId, userName, rating, cleanComment]
+    );
+
+    const newReview = insertRes.rows[0];
+
+    // Actualizar calificación promedio del restaurante
+    await pool.query(
+      `UPDATE restaurantes 
+       SET calificacion = (
+         SELECT COALESCE(AVG(puntuacion), 0) FROM reseñas WHERE restaurante_id = $1
+       )
+       WHERE id = $1`,
+      [restaurantId]
+    );
+
+    await pool.query('COMMIT');
+
+    res.status(201).json(newReview);
+  } catch (err) {
+    await pool.query('ROLLBACK');
+    console.error('Error al guardar reseña:', err);
+    res.status(500).json({ error: 'Error al guardar la reseña' });
   }
 });
 
