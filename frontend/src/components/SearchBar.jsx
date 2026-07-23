@@ -68,7 +68,7 @@ export default function SearchBar({ onSearch }) {
             maxLength={100}
             onChange={(e) => { handleChange(e); setOpen(true); }}
             onFocus={() => setOpen(true)}
-            className="w-full pl-12 pr-10 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 transition text-base"
+            className="w-full pl-12 pr-10 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-orange-500 transition text-base bg-white dark:bg-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
           />
           {query && (
             <button
@@ -87,15 +87,15 @@ export default function SearchBar({ onSearch }) {
 
       {/* T02: dropdown de sugerencias */}
       {showDropdown && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 overflow-hidden transition-colors">
           {query.length < 3 ? (
-            <p className="px-4 py-3 text-sm text-gray-500 text-center">
+            <p className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
               {t('search.minChars')}
             </p>
           ) : loading ? (
-            <p className="px-4 py-3 text-sm text-gray-500 text-center">{t('search.loading')}</p>
+            <p className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">{t('search.loading')}</p>
           ) : suggestions.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-gray-500 text-center">
+            <p className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
               {t('search.noResults', { query })}
             </p>
           ) : (
@@ -106,14 +106,14 @@ export default function SearchBar({ onSearch }) {
                   <li key={item.id}>
                     <button
                       onMouseDown={() => handleSelect(item)}
-                      className="w-full text-left px-4 py-3 hover:bg-orange-50 flex items-center justify-between gap-3 border-b border-gray-100 last:border-0 transition cursor-pointer"
+                      className="w-full text-left px-4 py-3 hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-700 last:border-0 transition cursor-pointer"
                     >
                       <div className="min-w-0">
                         {/* T03: resaltar coincidencias */}
-                        <span className="block text-sm font-medium text-gray-900 truncate">
+                        <span className="block text-sm font-medium text-gray-900 dark:text-white truncate">
                           {highlightText(item.nombre, query)}
                         </span>
-                        <span className="block text-xs text-gray-500 truncate">
+                        <span className="block text-xs text-gray-500 dark:text-gray-400 truncate">
                           {highlightText(item.tipo_comida, query)}
                         </span>
                       </div>

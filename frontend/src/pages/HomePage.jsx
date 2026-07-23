@@ -1,6 +1,7 @@
 import { ChefHat, Search, MapPin, MessageSquare, Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 
 const FEATURE_CARDS = [
   {
@@ -35,14 +36,14 @@ export default function HomePage({ onExplore }) {
   const { t } = useTranslation('home');
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-gray-950 transition-colors">
 
       {/* Navbar */}
-      <nav className="bg-white/90 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+      <nav className="bg-white dark:bg-gray-800 backdrop-blur-sm shadow-sm sticky top-0 z-50 transition-colors">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <ChefHat className="w-8 h-8 text-orange-500" />
-            <span className="text-2xl font-bold text-gray-900">FoodHub</span>
+            <span className="text-2xl font-bold text-gray-900 dark:text-white">FoodHub</span>
           </div>
           <div className="flex items-center gap-4">
             <button
@@ -51,7 +52,10 @@ export default function HomePage({ onExplore }) {
             >
               {t('hero.cta').replace(' →', '')}
             </button>
-            <LanguageSwitcher />
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher />
+              <ThemeSwitcher />
+            </div>
           </div>
         </div>
       </nav>
@@ -81,13 +85,13 @@ export default function HomePage({ onExplore }) {
       </section>
 
       {/* Feature cards */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50 dark:bg-gray-900 transition-colors">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-900 mb-3 text-center">{t('features.title')}</h2>
-          <p className="text-gray-500 text-center mb-12">{t('features.subtitle')}</p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3 text-center">{t('features.title')}</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-center mb-12">{t('features.subtitle')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {FEATURE_CARDS.map(({ id, icon: Icon, img }) => (
-              <div key={id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition group">
+              <div key={id} className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition group">
                 <div className="relative h-40 overflow-hidden bg-gray-100">
                   <img src={img} alt={t(`featureCards.${id}.title`)} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
@@ -96,8 +100,8 @@ export default function HomePage({ onExplore }) {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-bold text-gray-900 mb-1">{t(`featureCards.${id}.title`)}</h3>
-                  <p className="text-sm text-gray-500">{t(`featureCards.${id}.desc`)}</p>
+                  <h3 className="font-bold text-gray-900 dark:text-white mb-1">{t(`featureCards.${id}.title`)}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t(`featureCards.${id}.desc`)}</p>
                 </div>
               </div>
             ))}
@@ -106,10 +110,10 @@ export default function HomePage({ onExplore }) {
       </section>
 
       {/* Showcase */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white dark:bg-gray-950 transition-colors">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-900 mb-3 text-center">{t('showcase.title')}</h2>
-          <p className="text-gray-500 text-center mb-12">{t('showcase.subtitle')}</p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3 text-center">{t('showcase.title')}</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-center mb-12">{t('showcase.subtitle')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {SHOWCASE.map((r) => (
               <button key={r.name} onClick={onExplore} className="rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition group cursor-pointer block w-full text-left">
@@ -139,22 +143,22 @@ export default function HomePage({ onExplore }) {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50 dark:bg-gray-900 transition-colors">
         <div className="container mx-auto px-4">
-          <div className="relative rounded-3xl overflow-hidden bg-gray-100">
+          <div className="relative rounded-3xl overflow-hidden bg-gray-100 dark:bg-gray-800">
             <img
               src="https://images.pexels.com/photos/784633/pexels-photo-784633.jpeg?auto=compress&cs=tinysrgb&w=1400&h=500&fit=crop"
               alt="Restaurant table"
               loading="lazy"
               className="w-full h-64 object-cover"
             />
-            <div className="absolute inset-0 bg-orange-600/80" />
+            <div className="absolute inset-0 bg-orange-600/80 dark:bg-orange-600/60" />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
               <h2 className="text-3xl font-bold text-white mb-3">{t('cta.title')}</h2>
               <p className="text-white/90 text-lg mb-6">{t('cta.subtitle')}</p>
               <button
                 onClick={onExplore}
-                className="px-8 py-3 bg-white text-orange-600 rounded-xl font-bold hover:bg-gray-100 transition shadow cursor-pointer"
+                className="px-8 py-3 bg-white dark:bg-gray-900 text-orange-600 dark:text-orange-400 rounded-xl font-bold hover:bg-gray-100 dark:hover:bg-gray-800 transition shadow cursor-pointer"
               >
                 {t('cta.button')}
               </button>
@@ -164,7 +168,7 @@ export default function HomePage({ onExplore }) {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-8">
+      <footer className="bg-gray-900 dark:bg-gray-950 text-gray-400 dark:text-gray-500 py-8 transition-colors">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <ChefHat className="w-5 h-5 text-orange-500" />

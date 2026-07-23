@@ -35,16 +35,16 @@ export default function AmenityFilter({ selected, onChange }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-700">{t('filters.amenities')}</span>
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('filters.amenities')}</span>
 
         {selected.length > 0 && (
           <button
             onClick={() => onChange([])}
-            className="flex items-center gap-1 text-xs text-orange-600 hover:text-orange-700 cursor-pointer transition"
+            className="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 cursor-pointer transition"
           >
             <X className="w-3 h-3" />
             {t('filters.clear')}
-            <span className="bg-orange-500 text-white rounded-full px-1.5 py-0.5 text-xs font-bold ml-0.5">
+            <span className="bg-orange-500 dark:bg-orange-600 text-white rounded-full px-1.5 py-0.5 text-xs font-bold ml-0.5">
               {selected.length}
             </span>
           </button>
@@ -61,8 +61,8 @@ export default function AmenityFilter({ selected, onChange }) {
               onClick={() => toggle(a.slug)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition cursor-pointer select-none ${
                 isSelected
-                  ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:text-orange-600'
+                  ? 'bg-orange-500 dark:bg-orange-600 text-white border-orange-500 dark:border-orange-600 shadow-sm'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 hover:text-orange-600 dark:hover:text-orange-400'
               }`}
             >
               {Icon && <Icon className="w-3.5 h-3.5" />}

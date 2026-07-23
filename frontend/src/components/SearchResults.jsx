@@ -39,16 +39,16 @@ export default function SearchResults({ results, query, highlight = true, onSele
 
   if (results.length === 0) {
     return (
-      <div className="text-center py-16 bg-white rounded-xl shadow-sm">
-        <p className="text-gray-500 text-lg mb-2">
+      <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-900/50 transition-colors">
+        <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
           {t('searchResults.empty')}
         </p>
-        <p className="text-gray-400 text-sm mb-6">
+        <p className="text-gray-400 dark:text-gray-500 text-sm mb-6">
           {t('searchResults.tryAnother')}
         </p>
         <button
           onClick={onClear}
-          className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium"
+          className="px-6 py-2 bg-orange-500 dark:bg-orange-600 text-white rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition font-medium cursor-pointer"
         >
           {t('searchResults.clear')}
         </button>
@@ -58,7 +58,7 @@ export default function SearchResults({ results, query, highlight = true, onSele
 
   return (
     <div>
-      <p className="text-gray-600 mb-4">
+      <p className="text-gray-600 dark:text-gray-400 mb-4">
         {t('searchResults.count', { count: results.length })}
       </p>
 

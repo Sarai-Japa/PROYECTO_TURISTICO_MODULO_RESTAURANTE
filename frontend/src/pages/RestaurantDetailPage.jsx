@@ -25,7 +25,7 @@ function Stars({ value, t }) {
       <span className="text-xl text-yellow-400">
         {'★'.repeat(Math.round(rating))}{'☆'.repeat(5 - Math.round(rating))}
       </span>
-      <span className="text-lg font-bold text-gray-700 ml-1">
+      <span className="text-lg font-bold text-gray-700 dark:text-gray-300 ml-1">
         {rating > 0 ? `${rating.toFixed(1)}/5` : t('card.noRating')}
       </span>
     </div>
@@ -75,36 +75,36 @@ function InfoTab({ restaurantData, t }) {
   return (
     <div className="space-y-5">
       {descripcion && (
-        <div className="bg-white rounded-xl p-5 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-2">{t('tabs.about')}</h2>
-          <p className="text-gray-600 leading-relaxed text-sm">{descripcion}</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm dark:shadow-gray-900/50 transition-colors">
+          <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2">{t('tabs.about')}</h2>
+          <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm">{descripcion}</p>
         </div>
       )}
 
-      <div className="bg-white rounded-xl p-5 shadow-sm">
-        <h2 className="text-base font-bold text-gray-900 mb-4">{t('tabs.contact')}</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm dark:shadow-gray-900/50 transition-colors">
+        <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4">{t('tabs.contact')}</h2>
         <div className="space-y-3">
           {(direccion || ciudad) && (
             <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" />
+              <MapPin className="w-5 h-5 text-orange-500 dark:text-orange-400 mt-0.5 shrink-0" />
               <div>
-                {direccion && <p className="text-gray-700 text-sm">{direccion}</p>}
-                {ciudad && <p className="text-gray-500 text-xs mt-0.5">{ciudad}</p>}
+                {direccion && <p className="text-gray-700 dark:text-gray-300 text-sm">{direccion}</p>}
+                {ciudad && <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{ciudad}</p>}
               </div>
             </div>
           )}
           {telefono && (
             <div className="flex items-center gap-3">
-              <Phone className="w-5 h-5 text-orange-500 shrink-0" />
-              <a href={`tel:${telefono}`} className="text-gray-700 text-sm hover:text-orange-600 transition cursor-pointer">
+              <Phone className="w-5 h-5 text-orange-500 dark:text-orange-400 shrink-0" />
+              <a href={`tel:${telefono}`} className="text-gray-700 dark:text-gray-300 text-sm hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer">
                 {telefono}
               </a>
             </div>
           )}
           {horario && (
             <div className="flex items-start gap-3">
-              <Clock className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" />
-              <p className="text-gray-700 text-sm">{horario}</p>
+              <Clock className="w-5 h-5 text-orange-500 dark:text-orange-400 mt-0.5 shrink-0" />
+              <p className="text-gray-700 dark:text-gray-300 text-sm">{horario}</p>
             </div>
           )}
           {redes_sociales && (
@@ -113,7 +113,7 @@ function InfoTab({ restaurantData, t }) {
                 <a
                   href={`https://instagram.com/${redes_sociales.instagram.replace('@', '')}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs text-pink-600 bg-pink-50 px-3 py-1.5 rounded-lg hover:bg-pink-100 transition cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20 px-3 py-1.5 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/40 transition cursor-pointer"
                 >
                   📸 {redes_sociales.instagram}
                 </a>
@@ -122,7 +122,7 @@ function InfoTab({ restaurantData, t }) {
                 <a
                   href={`https://facebook.com/${redes_sociales.facebook}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition cursor-pointer"
                 >
                   📘 {redes_sociales.facebook}
                 </a>
@@ -132,9 +132,9 @@ function InfoTab({ restaurantData, t }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl overflow-hidden shadow-sm">
-        <div className="px-5 py-4 border-b border-gray-50">
-          <h2 className="text-base font-bold text-gray-900">{t('tabs.location')}</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm dark:shadow-gray-900/50 transition-colors">
+        <div className="px-5 py-4 border-b border-gray-50 dark:border-gray-700">
+          <h2 className="text-base font-bold text-gray-900 dark:text-white">{t('tabs.location')}</h2>
         </div>
         {hasCoords ? (
           <div style={{ height: '260px' }}>
@@ -154,12 +154,12 @@ function InfoTab({ restaurantData, t }) {
             </MapContainer>
           </div>
         ) : (
-          <div className="h-40 flex flex-col items-center justify-center gap-3 bg-gray-50">
-            <MapPin className="w-8 h-8 text-gray-300" />
+          <div className="h-40 flex flex-col items-center justify-center gap-3 bg-gray-50 dark:bg-gray-700/50 transition-colors">
+            <MapPin className="w-8 h-8 text-gray-300 dark:text-gray-600" />
             <a
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${nombre} ${direccion || ''} ${ciudad || ''}`)}`}
               target="_blank" rel="noopener noreferrer"
-              className="text-orange-600 hover:underline text-sm cursor-pointer"
+              className="text-orange-600 dark:text-orange-400 hover:underline text-sm cursor-pointer"
             >
               {t('buttons.googleMaps')}
             </a>
@@ -176,12 +176,12 @@ function MenuTab({ tipoComida }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {platos.map((plato, idx) => (
-        <div key={idx} className="bg-white rounded-xl p-4 shadow-sm border border-gray-50 hover:border-orange-100 transition">
+        <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm dark:shadow-gray-900/50 border border-gray-50 dark:border-gray-700 hover:border-orange-100 dark:hover:border-orange-800 transition">
           <div className="flex justify-between items-start gap-2 mb-1">
-            <h3 className="font-bold text-gray-900 text-sm">{plato.nombre}</h3>
-            <span className="text-orange-600 font-bold text-sm shrink-0">{plato.precio}</span>
+            <h3 className="font-bold text-gray-900 dark:text-white text-sm">{plato.nombre}</h3>
+            <span className="text-orange-600 dark:text-orange-400 font-bold text-sm shrink-0">{plato.precio}</span>
           </div>
-          <p className="text-gray-500 text-xs leading-relaxed">{plato.desc}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed">{plato.desc}</p>
         </div>
       ))}
     </div>
@@ -199,11 +199,11 @@ function ReviewForm({ restaurantId, isAuthenticated, onGoLogin, onReviewAdded, t
 
   if (!isAuthenticated) {
     return (
-      <div className="bg-orange-50 rounded-xl p-5 mb-6 flex flex-col items-center justify-center text-center">
-        <p className="text-gray-700 font-medium mb-3">{t('reviews.loginToReview')}</p>
+      <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-5 mb-6 flex flex-col items-center justify-center text-center transition-colors">
+        <p className="text-gray-700 dark:text-gray-300 font-medium mb-3">{t('reviews.loginToReview')}</p>
         <button
           onClick={onGoLogin}
-          className="px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg transition cursor-pointer"
+          className="px-5 py-2 bg-orange-600 dark:bg-orange-700 hover:bg-orange-700 dark:hover:bg-orange-600 text-white font-bold rounded-lg transition cursor-pointer"
         >
           {t('common:nav.login')}
         </button>
@@ -257,20 +257,20 @@ function ReviewForm({ restaurantId, isAuthenticated, onGoLogin, onReviewAdded, t
   };
 
   return (
-    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 mb-6">
-      <h3 className="font-bold text-gray-900 mb-4">{t('reviews.writeReview')}</h3>
-      {errorMsg && <div className="bg-red-50 text-red-600 rounded-lg p-3 text-sm mb-4">{errorMsg}</div>}
-      {successMsg && <div className="bg-green-50 text-green-600 rounded-lg p-3 text-sm mb-4">{successMsg}</div>}
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm dark:shadow-gray-900/50 border border-gray-100 dark:border-gray-700 mb-6 transition-colors">
+      <h3 className="font-bold text-gray-900 dark:text-white mb-4">{t('reviews.writeReview')}</h3>
+      {errorMsg && <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg p-3 text-sm mb-4">{errorMsg}</div>}
+      {successMsg && <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg p-3 text-sm mb-4">{successMsg}</div>}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">{t('reviews.rating')}</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('reviews.rating')}</label>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 type="button"
                 className={`text-3xl focus:outline-none transition-colors cursor-pointer ${
-                  star <= (hoverRating || rating) ? 'text-yellow-400' : 'text-gray-300'
+                  star <= (hoverRating || rating) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
                 }`}
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(0)}
@@ -282,9 +282,9 @@ function ReviewForm({ restaurantId, isAuthenticated, onGoLogin, onReviewAdded, t
           </div>
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">{t('reviews.comment')}</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('reviews.comment')}</label>
           <textarea
-            className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:border-orange-500 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition"
             rows="4"
             placeholder={t('reviews.commentPlaceholder')}
             value={comment}
@@ -296,8 +296,8 @@ function ReviewForm({ restaurantId, isAuthenticated, onGoLogin, onReviewAdded, t
           disabled={submitting}
           className={`px-5 py-2.5 font-bold rounded-lg transition cursor-pointer ${
             submitting
-              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-              : 'bg-orange-600 hover:bg-orange-700 text-white'
+              ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+              : 'bg-orange-600 dark:bg-orange-700 hover:bg-orange-700 dark:hover:bg-orange-600 text-white'
           }`}
         >
           {submitting ? t('reviews.sending') : t('reviews.submit')}
@@ -326,19 +326,19 @@ function ReviewsTab({ restaurantId, isAuthenticated, onGoLogin, t, i18n }) {
               <span className="text-yellow-400 text-lg">
                 {'★'.repeat(Math.round(avgRating))}{'☆'.repeat(5 - Math.round(avgRating))}
               </span>
-              <span className="font-bold text-gray-800">{avgRating.toFixed(1)}/5</span>
-              <span className="text-sm text-gray-400">
+              <span className="font-bold text-gray-800 dark:text-gray-200">{avgRating.toFixed(1)}/5</span>
+              <span className="text-sm text-gray-400 dark:text-gray-500">
                 {t('reviews.basedOn', { count: meta.total })}
               </span>
             </div>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <label className="text-sm text-gray-500">{t('reviews.sort')}:</label>
+          <label className="text-sm text-gray-500 dark:text-gray-400">{t('reviews.sort')}:</label>
           <select
             value={sort}
             onChange={(e) => handleSortChange(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white cursor-pointer focus:outline-none focus:border-orange-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-800 dark:text-white cursor-pointer focus:outline-none focus:border-orange-500 transition"
           >
             <option value="date">{t('reviews.sortDate')}</option>
             <option value="rating">{t('reviews.sortRating')}</option>
@@ -347,37 +347,37 @@ function ReviewsTab({ restaurantId, isAuthenticated, onGoLogin, t, i18n }) {
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-600 rounded-xl p-4 text-sm text-center mb-4">{error}</div>
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl p-4 text-sm text-center mb-4">{error}</div>
       )}
 
       {reviews.length === 0 && !loading && !error && (
-        <div className="bg-gray-50 rounded-2xl p-10 text-center border border-dashed border-gray-200">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-10 text-center border border-dashed border-gray-200 dark:border-gray-700 transition-colors">
           <span className="text-4xl block mb-3">💬</span>
-          <p className="text-lg font-bold text-gray-800">{t('reviews.firstOpinion')}</p>
-          <p className="text-sm text-gray-400 mt-1">{t('reviews.shareExperience')}</p>
+          <p className="text-lg font-bold text-gray-800 dark:text-white">{t('reviews.firstOpinion')}</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{t('reviews.shareExperience')}</p>
         </div>
       )}
 
       <div className="space-y-4">
         {reviews.map((r) => (
-          <div key={r.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div key={r.id} className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm dark:shadow-gray-900/50 border border-gray-100 dark:border-gray-700 transition-colors">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-base shrink-0 select-none">
+              <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold text-base shrink-0 select-none">
                 {r.usuario_nombre?.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-gray-900">{r.usuario_nombre}</p>
+                <p className="font-bold text-gray-900 dark:text-white">{r.usuario_nombre}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="text-yellow-400 text-sm">
                     {'★'.repeat(r.puntuacion)}{'☆'.repeat(5 - r.puntuacion)}
                   </span>
-                  <span className="text-xs text-gray-400">•</span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
                     {formatReviewDate(r.fecha_creacion, i18n.language)}
                   </span>
                 </div>
                 {r.comentario && (
-                  <p className="text-gray-600 text-sm leading-relaxed mt-2">{r.comentario}</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mt-2">{r.comentario}</p>
                 )}
               </div>
             </div>
@@ -388,11 +388,11 @@ function ReviewsTab({ restaurantId, isAuthenticated, onGoLogin, t, i18n }) {
       {loading && (
         <div className="space-y-4 mt-4">
           {[1, 2].map((i) => (
-            <div key={i} className="animate-pulse bg-gray-50 rounded-xl p-5">
-              <div className="h-4 bg-gray-200 rounded w-1/4 mb-2" />
-              <div className="h-3 bg-gray-200 rounded w-1/3 mb-3" />
-              <div className="h-3 bg-gray-200 rounded w-full mb-1" />
-              <div className="h-3 bg-gray-200 rounded w-5/6" />
+            <div key={i} className="animate-pulse bg-gray-50 dark:bg-gray-800 rounded-xl p-5">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-2" />
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-3" />
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-1" />
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
             </div>
           ))}
         </div>
@@ -402,7 +402,7 @@ function ReviewsTab({ restaurantId, isAuthenticated, onGoLogin, t, i18n }) {
         <div className="text-center mt-6">
           <button
             onClick={loadMore}
-            className="px-6 py-2.5 bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold rounded-xl border border-orange-100 text-sm cursor-pointer transition"
+            className="px-6 py-2.5 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-orange-600 dark:text-orange-400 font-bold rounded-xl border border-orange-100 dark:border-orange-800 text-sm cursor-pointer transition"
           >
             {t('reviews.loadMore')}
           </button>
@@ -448,12 +448,12 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
 
   if (pageError === '404') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-2xl">404</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('error.notFound')}</h2>
-          <p className="text-gray-500 text-sm mb-6">{t('error.notFoundDesc')}</p>
-          <button onClick={onBack} className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition cursor-pointer">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-6 transition-colors">
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl dark:shadow-gray-900/50 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-2xl">404</div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('error.notFound')}</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{t('error.notFoundDesc')}</p>
+          <button onClick={onBack} className="w-full py-3 bg-orange-500 dark:bg-orange-600 hover:bg-orange-600 dark:hover:bg-orange-700 text-white font-bold rounded-xl transition cursor-pointer">
             {t('buttons.back')}
           </button>
         </div>
@@ -463,12 +463,12 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
 
   if (pageError) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-6 transition-colors">
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl dark:shadow-gray-900/50 max-w-md w-full text-center">
           <div className="text-4xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">{t('error.connectionError')}</h2>
-          <p className="text-gray-500 text-sm mb-6">{t('error.connectionErrorDesc')}</p>
-          <button onClick={onBack} className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition cursor-pointer">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('error.connectionError')}</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{t('error.connectionErrorDesc')}</p>
+          <button onClick={onBack} className="w-full py-3 bg-orange-500 dark:bg-orange-600 hover:bg-orange-600 dark:hover:bg-orange-700 text-white font-bold rounded-xl transition cursor-pointer">
             {t('buttons.back')}
           </button>
         </div>
@@ -485,10 +485,10 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
 
       {/* Hero */}
-      <div className="relative h-72 md:h-96 bg-gray-200">
+      <div className="relative h-72 md:h-96 bg-gray-200 dark:bg-gray-700">
         <img
           src={imagen_url || DEFAULT_IMG}
           alt={nombre}
@@ -530,12 +530,12 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
       </div>
 
       {/* Rating + Tabs sticky */}
-      <div className="bg-white shadow-sm sticky top-0 z-10">
+      <div className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-10 transition-colors">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="flex items-center justify-between py-3 border-b border-gray-50">
+          <div className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-gray-800">
             <Stars value={calificacion} t={t} />
             {categoria && (
-              <span className="text-orange-600 text-xs bg-orange-50 px-3 py-1 rounded-full font-medium">
+              <span className="text-orange-600 dark:text-orange-400 text-xs bg-orange-50 dark:bg-orange-900/30 px-3 py-1 rounded-full font-medium">
                 {categoria}
               </span>
             )}
@@ -547,8 +547,8 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
                 onClick={() => setActiveTab(key)}
                 className={`px-5 py-3 text-sm font-semibold border-b-2 transition cursor-pointer ${
                   activeTab === key
-                    ? 'border-orange-500 text-orange-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
                 {label}

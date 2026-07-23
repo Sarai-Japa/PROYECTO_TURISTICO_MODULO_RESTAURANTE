@@ -13,12 +13,12 @@ export default function DateFilter({ selected, onChange }) {
 
   if (selected) {
     return (
-      <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-xl px-3 py-2">
-        <Calendar className="w-4 h-4 text-orange-500 shrink-0" />
-        <span className="text-sm text-orange-700 font-medium">{formatLocaleDateLong(selected, i18n.language)}</span>
+      <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl px-3 py-2 transition-colors">
+        <Calendar className="w-4 h-4 text-orange-500 dark:text-orange-400 shrink-0" />
+        <span className="text-sm text-orange-700 dark:text-orange-300 font-medium">{formatLocaleDateLong(selected, i18n.language)}</span>
         <button
           onClick={() => onChange(null)}
-          className="text-orange-400 hover:text-orange-600 cursor-pointer transition"
+          className="text-orange-400 dark:text-orange-600 hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer transition"
           aria-label={t('filters.removeDate')}
         >
           <X className="w-4 h-4" />
@@ -29,13 +29,13 @@ export default function DateFilter({ selected, onChange }) {
 
   return (
     <div className="relative">
-      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
       <input
         type="date"
         min={today}
         value=""
         onChange={(e) => onChange(e.target.value || null)}
-        className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-orange-500 transition cursor-pointer"
+        className="w-full pl-9 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:border-orange-500 transition cursor-pointer"
       />
     </div>
   );

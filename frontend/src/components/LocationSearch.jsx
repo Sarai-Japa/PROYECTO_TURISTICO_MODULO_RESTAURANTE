@@ -54,16 +54,16 @@ export default function LocationSearch({ activeLocation, radius, onLocationChang
       {activeLocation ? (
         /* Badge when location is active */
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-xl px-3 py-2">
-            <MapPin className="w-4 h-4 text-orange-500 shrink-0" />
-            <span className="text-sm text-orange-700 font-medium truncate max-w-[220px]">
+          <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl px-3 py-2 transition-colors">
+            <MapPin className="w-4 h-4 text-orange-500 dark:text-orange-400 shrink-0" />
+            <span className="text-sm text-orange-700 dark:text-orange-300 font-medium truncate max-w-[220px]">
               {activeLocation.label}
             </span>
 
             <select
               value={radius}
               onChange={(e) => onRadiusChange(Number(e.target.value))}
-              className="text-xs text-orange-600 bg-orange-100 rounded-full px-2 py-0.5 border-0 focus:outline-none cursor-pointer font-medium"
+              className="text-xs text-orange-600 dark:text-orange-300 bg-orange-100 dark:bg-orange-900/40 rounded-full px-2 py-0.5 border-0 focus:outline-none cursor-pointer font-medium"
             >
               {RADIUS_OPTIONS.map((r) => (
                 <option key={r} value={r}>{r} km</option>
@@ -72,7 +72,7 @@ export default function LocationSearch({ activeLocation, radius, onLocationChang
 
             <button
               onClick={handleClear}
-              className="text-orange-400 hover:text-orange-600 cursor-pointer transition"
+              className="text-orange-400 dark:text-orange-600 hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer transition"
               title={t('location.removeFilter')}
             >
               <X className="w-4 h-4" />
@@ -82,18 +82,18 @@ export default function LocationSearch({ activeLocation, radius, onLocationChang
       ) : (
         /* Search input */
         <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('location.placeholder')}
-            className="w-full pl-9 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-500 transition bg-white placeholder-gray-400"
+            className="w-full pl-9 pr-10 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:border-orange-500 transition bg-white dark:bg-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
           />
           <button
             onClick={handleUseMyLocation}
             title={t('location.useMyLocation')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 cursor-pointer transition"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition"
           >
             <Navigation className="w-4 h-4" />
           </button>
@@ -102,9 +102,9 @@ export default function LocationSearch({ activeLocation, radius, onLocationChang
 
       {/* Suggestions dropdown */}
       {!activeLocation && showDropdown && (
-        <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+        <div className="absolute top-full mt-1 left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 overflow-hidden transition-colors">
           {loading ? (
-            <div className="flex items-center gap-2 px-4 py-3 text-sm text-gray-500">
+            <div className="flex items-center gap-2 px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
               <Loader className="w-4 h-4 animate-spin" />
               {t('location.searching')}
             </div>
@@ -113,10 +113,10 @@ export default function LocationSearch({ activeLocation, radius, onLocationChang
               <button
                 key={i}
                 onClick={() => handleSelect(s)}
-                className="w-full text-left px-4 py-3 text-sm hover:bg-orange-50 flex items-start gap-2 cursor-pointer transition border-b border-gray-50 last:border-0"
+                className="w-full text-left px-4 py-3 text-sm hover:bg-orange-50 dark:hover:bg-gray-700 flex items-start gap-2 cursor-pointer transition border-b border-gray-50 dark:border-gray-700 last:border-0"
               >
-                <MapPin className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
-                <span className="text-gray-700 line-clamp-2">{s.label}</span>
+                <MapPin className="w-4 h-4 text-orange-400 dark:text-orange-500 shrink-0 mt-0.5" />
+                <span className="text-gray-700 dark:text-gray-300 line-clamp-2">{s.label}</span>
               </button>
             ))
           )}

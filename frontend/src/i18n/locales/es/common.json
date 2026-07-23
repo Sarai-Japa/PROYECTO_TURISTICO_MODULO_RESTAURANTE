@@ -4,6 +4,11 @@
     "en": "English",
     "switchTo": "Cambiar a {{lang}}"
   },
+  "theme": {
+    "dark": "Modo oscuro",
+    "light": "Modo día",
+    "switchTo": "Cambiar a {{mode}}"
+  },
   "nav": {
     "explore": "Explorar",
     "favorites": "Favoritos",

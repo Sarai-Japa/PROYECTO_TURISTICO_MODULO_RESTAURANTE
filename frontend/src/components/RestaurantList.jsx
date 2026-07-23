@@ -124,18 +124,18 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
   if (restaurants.length === 0) {
     const hasFilters = locationFilter || amenities.length > 0 || date;
     return (
-      <div className="text-center py-16 bg-white rounded-xl shadow-sm">
+      <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-900/50 transition-colors">
         {hasFilters ? (
           <>
             <div className="flex justify-center mb-2">
               {amenities.length > 0
-                ? <Search className="w-8 h-8 text-gray-300" />
-                : <MapPin className="w-8 h-8 text-gray-300" />}
+                ? <Search className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+                : <MapPin className="w-8 h-8 text-gray-300 dark:text-gray-600" />}
             </div>
-            <p className="text-gray-700 font-medium text-lg mb-1">
+            <p className="text-gray-700 dark:text-gray-300 font-medium text-lg mb-1">
               {t('empty.title')}
             </p>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
               {locationFilter && date
                 ? t('empty.bothFilters', { radius: locationFilter.radius ?? 5 })
                 : date && !locationFilter
@@ -157,7 +157,7 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
       {/* HU04-T03: overlay de actualización cuando ya hay resultados (sin recargar la página) */}
       {loading && (
         <div className="absolute top-0 left-0 right-0 flex justify-center z-10 pointer-events-none">
-          <div className="flex items-center gap-2 bg-white border border-orange-200 rounded-full px-3 py-1 shadow-sm text-sm text-orange-600 mt-1">
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-800 rounded-full px-3 py-1 shadow-sm text-sm text-orange-600 dark:text-orange-400 mt-1 transition-colors">
             <Loader className="w-3.5 h-3.5 animate-spin" />
             <span>{t('list.updating')}</span>
           </div>
@@ -166,7 +166,7 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
 
       <div className={loading ? 'opacity-50 pointer-events-none' : ''}>
         <div className="flex items-center justify-between mb-4">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             {(locationFilter || amenities.length > 0 || date)
               ? t('list.countFound', { count: meta.total, defaultValue: `${meta.total} restaurante${meta.total !== 1 ? 's' : ''} encontrado${meta.total !== 1 ? 's' : ''}` })
               : t('list.countAvailable', { count: meta.total, defaultValue: `${meta.total} restaurante${meta.total !== 1 ? 's' : ''} disponible${meta.total !== 1 ? 's' : ''}` })}
@@ -201,12 +201,12 @@ export default function RestaurantList({ onSelect, locationFilter = null, amenit
 
 function SizeSelector({ size, onChange, t }) {
   return (
-    <div className="flex items-center gap-2 text-sm text-gray-600">
+    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
       <span>{t('list.show')}:</span>
       <select
         value={size}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-orange-500 cursor-pointer transition"
+        className="border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:border-orange-500 cursor-pointer transition"
       >
         {SIZE_OPTIONS.map((n) => (
           <option key={n} value={n}>{n}</option>

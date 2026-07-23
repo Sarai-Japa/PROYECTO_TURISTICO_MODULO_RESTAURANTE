@@ -42,7 +42,7 @@ export default function RestaurantCard({ restaurant, onClick, isFavorite = false
 
   return (
     <div
-      className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer group"
+      className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer group dark:shadow-gray-900/50"
       onClick={() => onClick(restaurant)}
     >
       {/* Imagen */}
@@ -79,10 +79,10 @@ export default function RestaurantCard({ restaurant, onClick, isFavorite = false
 
       {/* Info */}
       <div className="p-4">
-        <h3 className="font-bold text-gray-900 text-lg mb-1 truncate">{nombre}</h3>
+        <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1 truncate">{nombre}</h3>
 
         {tipo_comida && (
-          <p className="text-xs text-orange-600 bg-orange-50 inline-block rounded-full px-2 py-0.5 mb-2 font-medium">
+          <p className="text-xs text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 inline-block rounded-full px-2 py-0.5 mb-2 font-medium">
             {tipo_comida}
           </p>
         )}
@@ -93,14 +93,14 @@ export default function RestaurantCard({ restaurant, onClick, isFavorite = false
         </div>
 
         {/* Ubicación */}
-        <div className="flex items-center gap-1 text-sm text-gray-500">
+        <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
           <MapPin className="w-3.5 h-3.5 text-orange-500 shrink-0" />
           <span className="truncate">{ciudad || t('card.noLocation')}</span>
         </div>
       </div>
 
       <div className="px-4 pb-4">
-        <button className="w-full py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium text-sm cursor-pointer">
+        <button className="w-full py-2 bg-orange-500 dark:bg-orange-600 text-white rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition font-medium text-sm cursor-pointer">
           {t('card.viewDetail')}
         </button>
       </div>

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { mapApiError } from '../i18n/mapApiError';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -62,9 +63,10 @@ export default function RegisterPage({ onSuccess, onGoLogin, onBack }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4 relative">
-      <div className="absolute top-4 right-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white dark:from-gray-900 dark:to-gray-950 flex items-center justify-center p-4 relative transition-colors">
+      <div className="absolute top-4 right-4 flex items-center gap-3">
         <LanguageSwitcher />
+        <ThemeSwitcher />
       </div>
 
       <div className="w-full max-w-md">
@@ -72,12 +74,12 @@ export default function RegisterPage({ onSuccess, onGoLogin, onBack }) {
         <div className="text-center mb-8">
           <button onClick={onBack} className="flex items-center justify-center gap-2 mx-auto mb-2 hover:opacity-80 transition cursor-pointer">
             <ChefHat className="w-10 h-10 text-orange-500" />
-            <span className="text-3xl font-bold text-gray-900">FoodHub</span>
+            <span className="text-3xl font-bold text-gray-900 dark:text-white">FoodHub</span>
           </button>
-          <p className="text-gray-500">{t('register.title')}</p>
+          <p className="text-gray-500 dark:text-gray-400">{t('register.title')}</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 transition-colors">
           <form onSubmit={handleSubmit} className="space-y-5">
 
             <div>

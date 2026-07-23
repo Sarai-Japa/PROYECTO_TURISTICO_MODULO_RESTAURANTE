@@ -8,6 +8,7 @@ import LocationSearch from '../components/LocationSearch';
 import AmenityFilter from '../components/AmenityFilter';
 import DateFilter from '../components/DateFilter';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 import { useAuth } from '../context/AuthContext';
 import { formatLocaleDateLong } from '../i18n/formatLocaleDate';
 
@@ -52,29 +53,29 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
 
   return (
     <>
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
+      <nav className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-colors">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <button onClick={onBack} className="flex items-center gap-2 hover:opacity-80 transition cursor-pointer">
             <ChefHat className="w-8 h-8 text-orange-500" />
-            <span className="text-2xl font-bold text-gray-900">FoodHub</span>
+            <span className="text-2xl font-bold text-gray-900 dark:text-white">FoodHub</span>
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-gray-600 font-medium hidden sm:inline">
+                <span className="text-sm text-gray-600 dark:text-gray-400 font-medium hidden sm:inline">
                   {t('common:nav.hello', { name: user?.nombre })}
                 </span>
                 <button
                   onClick={onGoFavorites}
-                  className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-orange-500 transition cursor-pointer"
+                  className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400 transition cursor-pointer"
                 >
                   <Heart className="w-4 h-4" />
                   <span className="hidden sm:inline">{t('common:nav.favorites')}</span>
                 </button>
                 <button
                   onClick={logout}
-                  className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-500 transition cursor-pointer"
+                  className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   <span className="hidden sm:inline">{t('common:nav.logout')}</span>
@@ -84,7 +85,7 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
               <>
                 <button
                   onClick={onGoLogin}
-                  className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-orange-500 transition cursor-pointer"
+                  className="flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400 transition cursor-pointer"
                 >
                   <LogIn className="w-4 h-4" />
                   {t('common:nav.login')}
@@ -92,11 +93,12 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
               </>
             )}
             <LanguageSwitcher />
+            <ThemeSwitcher />
           </div>
         </div>
       </nav>
 
-      <main className="min-h-screen bg-gradient-to-br from-orange-50 to-white">
+      <main className="min-h-screen bg-gradient-to-br from-orange-50 to-white dark:from-gray-900 dark:to-gray-950 transition-colors">
         <div className="container mx-auto px-4 py-8">
 
           <div className="mb-8">
