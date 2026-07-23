@@ -7,6 +7,7 @@ import authEs from './locales/es/auth.json';
 import restaurantsEs from './locales/es/restaurants.json';
 import restaurantDetailEs from './locales/es/restaurantDetail.json';
 import favoritesEs from './locales/es/favorites.json';
+import mapEs from './locales/es/map.json';
 
 import commonEn from './locales/en/common.json';
 import homeEn from './locales/en/home.json';
@@ -14,6 +15,7 @@ import authEn from './locales/en/auth.json';
 import restaurantsEn from './locales/en/restaurants.json';
 import restaurantDetailEn from './locales/en/restaurantDetail.json';
 import favoritesEn from './locales/en/favorites.json';
+import mapEn from './locales/en/map.json';
 
 const STORAGE_KEY = 'fh_lang';
 
@@ -31,6 +33,7 @@ i18n.use(initReactI18next).init({
       restaurants: restaurantsEs,
       restaurantDetail: restaurantDetailEs,
       favorites: favoritesEs,
+      map: mapEs,
     },
     en: {
       common: commonEn,
@@ -39,11 +42,12 @@ i18n.use(initReactI18next).init({
       restaurants: restaurantsEn,
       restaurantDetail: restaurantDetailEn,
       favorites: favoritesEn,
+      map: mapEn,
     },
   },
   lng: getInitialLanguage(),
   fallbackLng: 'es',
-  ns: ['common', 'home', 'auth', 'restaurants', 'restaurantDetail', 'favorites'],
+  ns: ['common', 'home', 'auth', 'restaurants', 'restaurantDetail', 'favorites', 'map'],
   defaultNS: 'common',
   interpolation: { escapeValue: false },
   returnEmptyString: false,

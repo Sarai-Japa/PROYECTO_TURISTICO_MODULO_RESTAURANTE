@@ -161,6 +161,48 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/restaurants/nearby?lat=&lng=&radius=  (HU16)
+// Reutiliza buildFilters (Haversine + bounding box indexado) sin paginación,
+// agregando latitud/longitud al SELECT para poder ubicar los marcadores en el mapa.
+router.get('/nearby', async (req, res) => {
+  const lat = parseFloat(req.query.lat);
+  const lng = parseFloat(req.query.lng);
+
+  if (isNaN(lat) || isNaN(lng)) {
+    return res.status(400).json({ error: 'Parámetros lat y lng son requeridos y deben ser numéricos' });
+  }
+
+  const radius = Math.min(50, Math.max(0.1, parseFloat(req.query.radius) || 5));
+  const LIMIT  = 100;
+
+  try {
+    const { params, joinSQL, whereSQL, groupSQL, havingSQL, selectExtra, orderBy } =
+      buildFilters({ lat, lng, radius, amenities: [], dow: null });
+
+    const dataParams = [...params, LIMIT];
+    const pLimit      = `$${dataParams.length}`;
+
+    const dataSQL = `
+      SELECT r.id, r.nombre, r.tipo_comida, r.categoria,
+             r.direccion, r.ciudad, r.imagen_url, r.calificacion,
+             r.latitud, r.longitud${selectExtra}
+      FROM restaurantes r
+      ${joinSQL}
+      ${whereSQL}
+      ${groupSQL}
+      ${havingSQL}
+      ORDER BY ${orderBy}
+      LIMIT ${pLimit}`;
+
+    const { rows } = await pool.query(dataSQL, dataParams);
+
+    res.json({ restaurants: rows, meta: { total: rows.length, radius } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener restaurantes cercanos' });
+  }
+});
+
 // GET /api/restaurants/:id/reviews?page=
 router.get('/:id/reviews', async (req, res) => {
   const id = parseInt(req.params.id);

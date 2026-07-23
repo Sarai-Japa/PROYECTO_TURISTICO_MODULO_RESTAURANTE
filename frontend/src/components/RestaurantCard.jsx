@@ -23,7 +23,7 @@ function Stars({ value, t }) {
 }
 
 // T01: tarjeta de restaurante — imagen, nombre, calificación (estrellas), ubicación
-export default function RestaurantCard({ restaurant, onClick, isFavorite = false, onToggleFavorite, isAuthenticated = false, onGoLogin }) {
+export default function RestaurantCard({ restaurant, onClick, isFavorite = false, onToggleFavorite, isAuthenticated = false, onGoLogin, onViewOnMap }) {
   const { nombre, imagen_url, calificacion, ciudad, tipo_comida } = restaurant;
   const { t } = useTranslation('restaurants');
   const [loaded, setLoaded] = useState(false);
@@ -99,10 +99,23 @@ export default function RestaurantCard({ restaurant, onClick, isFavorite = false
         </div>
       </div>
 
-      <div className="px-4 pb-4">
-        <button className="w-full py-2 bg-orange-500 dark:bg-orange-600 text-white rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition font-medium text-sm cursor-pointer">
+      <div className="px-4 pb-4 flex gap-2">
+        <button
+          onClick={(e) => { e.stopPropagation(); onClick(restaurant); }}
+          className="flex-1 py-2 bg-orange-500 dark:bg-orange-600 text-white rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition font-medium text-sm cursor-pointer"
+        >
           {t('card.viewDetail')}
         </button>
+        {onViewOnMap && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onViewOnMap(restaurant); }}
+            title={t('card.viewOnMap')}
+            aria-label={t('card.viewOnMap')}
+            className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition cursor-pointer shrink-0"
+          >
+            <MapPin className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </div>
   );

@@ -38,7 +38,8 @@
     "addFavorite": "Save to favorites",
     "removeFavorite": "Remove from favorites",
     "noLocation": "Location not available",
-    "viewDetail": "View Detail →"
+    "viewDetail": "View Detail →",
+    "viewOnMap": "View on map"
   },
 
   "list": {

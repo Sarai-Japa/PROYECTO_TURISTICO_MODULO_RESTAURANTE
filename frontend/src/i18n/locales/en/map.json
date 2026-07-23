@@ -1,0 +1,13 @@
+{
+  "viewList": "View list",
+  "locating": "Detecting your location…",
+  "myLocation": "My location",
+  "defaultLocation": "Tingo María, Peru",
+  "youAreHere": "You are here",
+  "geoDenied": "We couldn't access your location. You can search manually or move the map.",
+  "updating": "Updating…",
+  "fetchError": "Couldn't load restaurants. Please try again.",
+  "noResultsInArea": "No restaurants in this area",
+  "viewDetail": "View detail",
+  "directions": "Directions"
+}

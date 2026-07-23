@@ -1,0 +1,13 @@
+{
+  "viewList": "Ver lista",
+  "locating": "Detectando tu ubicación…",
+  "myLocation": "Mi ubicación",
+  "defaultLocation": "Tingo María, Perú",
+  "youAreHere": "Estás aquí",
+  "geoDenied": "No pudimos acceder a tu ubicación. Puedes buscar manualmente con el buscador o moviendo el mapa.",
+  "updating": "Actualizando…",
+  "fetchError": "No se pudieron cargar los restaurantes. Intenta de nuevo.",
+  "noResultsInArea": "No hay restaurantes en esta zona",
+  "viewDetail": "Ver detalle",
+  "directions": "Cómo llegar"
+}

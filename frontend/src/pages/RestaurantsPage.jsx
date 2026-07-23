@@ -12,7 +12,7 @@ import ThemeSwitcher from '../components/ThemeSwitcher';
 import { useAuth } from '../context/AuthContext';
 import { formatLocaleDateLong } from '../i18n/formatLocaleDate';
 
-export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin, onGoFavorites, favoriteIds = new Set(), onToggleFavorite }) {
+export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin, onGoFavorites, onGoMap, favoriteIds = new Set(), onToggleFavorite }) {
   const { user, isAuthenticated, logout } = useAuth();
   const { t, i18n } = useTranslation('restaurants');
   const [searchResults, setSearchResults] = useState(null);
@@ -61,6 +61,13 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
           </button>
 
           <div className="flex items-center gap-4">
+            <button
+              onClick={onGoMap}
+              className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400 transition cursor-pointer"
+            >
+              <MapPin className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('common:nav.map')}</span>
+            </button>
             {isAuthenticated ? (
               <>
                 <span className="text-sm text-gray-600 dark:text-gray-400 font-medium hidden sm:inline">
@@ -83,6 +90,13 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
               </>
             ) : (
               <>
+                <button
+                  onClick={onGoFavorites}
+                  className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400 transition cursor-pointer"
+                >
+                  <Heart className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t('common:nav.favorites')}</span>
+                </button>
                 <button
                   onClick={onGoLogin}
                   className="flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400 transition cursor-pointer"

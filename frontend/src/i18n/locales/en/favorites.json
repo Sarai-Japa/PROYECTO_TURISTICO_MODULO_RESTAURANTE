@@ -1,4 +1,12 @@
 {
   "title": "My Favorites",
-  "message": "Soon you'll be able to save and manage your favorite restaurants here."
+  "backToRestaurants": "Back to restaurants",
+  "subtitle_one": "{{count}} restaurant saved",
+  "subtitle_other": "{{count}} restaurants saved",
+  "error": "Couldn't load your favorites. Please try again later.",
+  "empty": {
+    "title": "No favorites yet",
+    "message": "Explore restaurants and tap the heart to save your favorite spots here.",
+    "cta": "Explore restaurants"
+  }
 }

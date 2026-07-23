@@ -1,4 +1,12 @@
 {
   "title": "Mis Favoritos",
-  "message": "Próximamente podrás guardar y gestionar tus restaurantes favoritos aquí."
+  "backToRestaurants": "Volver a restaurantes",
+  "subtitle_one": "{{count}} restaurante guardado",
+  "subtitle_other": "{{count}} restaurantes guardados",
+  "error": "No se pudieron cargar tus favoritos. Intenta de nuevo más tarde.",
+  "empty": {
+    "title": "Aún no tienes favoritos",
+    "message": "Explora restaurantes y toca el corazón para guardar tus lugares preferidos aquí.",
+    "cta": "Explorar restaurantes"
+  }
 }

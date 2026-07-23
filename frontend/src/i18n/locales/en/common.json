@@ -12,6 +12,7 @@
   "nav": {
     "explore": "Explore",
     "favorites": "Favorites",
+    "map": "Map",
     "login": "Sign in",
     "logout": "Sign out",
     "hello": "Hello, {{name}}"

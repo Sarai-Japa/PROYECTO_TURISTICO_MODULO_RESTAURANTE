@@ -12,6 +12,7 @@
   "nav": {
     "explore": "Explorar",
     "favorites": "Favoritos",
+    "map": "Mapa",
     "login": "Iniciar sesión",
     "logout": "Cerrar sesión",
     "hello": "Hola, {{name}}"

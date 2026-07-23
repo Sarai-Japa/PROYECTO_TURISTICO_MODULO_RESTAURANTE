@@ -17,7 +17,8 @@ router.get('/', async (req, res) => {
     const [dataResult, countResult] = await Promise.all([
       pool.query(
         `SELECT r.id, r.nombre, r.tipo_comida, r.categoria,
-                r.imagen_url, r.calificacion, r.ciudad
+                r.imagen_url, r.calificacion, r.ciudad,
+                r.latitud, r.longitud
          FROM user_favorites uf
          JOIN restaurantes r ON r.id = uf.restaurant_id
          WHERE uf.user_id = $1
