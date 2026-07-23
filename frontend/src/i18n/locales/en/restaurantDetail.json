@@ -27,7 +27,18 @@
     "sortRating": "Best rated",
     "firstOpinion": "Be the first to review",
     "shareExperience": "Share your experience with other tourists.",
-    "loadMore": "Load more reviews"
+    "loadMore": "Load more reviews",
+    "loginToReview": "Sign in to leave a review",
+    "selectRating": "Please select a rating.",
+    "minCommentLength": "Comment must be at least 5 characters.",
+    "submitError": "Error submitting review",
+    "thankYou": "Thank you for your review!",
+    "writeReview": "Write your review",
+    "rating": "Rating",
+    "comment": "Comment",
+    "commentPlaceholder": "How was your experience?",
+    "sending": "Sending...",
+    "submit": "Submit"
   },
 
   "error": {

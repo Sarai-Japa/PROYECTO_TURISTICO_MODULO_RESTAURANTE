@@ -27,7 +27,18 @@
     "sortRating": "Mejor puntuadas",
     "firstOpinion": "Sé el primero en opinar",
     "shareExperience": "Comparte tu experiencia con otros turistas.",
-    "loadMore": "Cargar más opiniones"
+    "loadMore": "Cargar más opiniones",
+    "loginToReview": "Inicia sesión para dejar una reseña",
+    "selectRating": "Por favor selecciona una calificación.",
+    "minCommentLength": "El comentario debe tener al menos 5 caracteres.",
+    "submitError": "Error al enviar reseña",
+    "thankYou": "¡Gracias por tu reseña!",
+    "writeReview": "Escribe tu reseña",
+    "rating": "Calificación",
+    "comment": "Comentario",
+    "commentPlaceholder": "¿Qué tal estuvo tu experiencia?",
+    "sending": "Enviando...",
+    "submit": "Enviar"
   },
 
   "error": {
