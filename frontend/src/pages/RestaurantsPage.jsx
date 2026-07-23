@@ -116,8 +116,8 @@ export default function RestaurantsPage({ onBack, onSelectRestaurant, onGoLogin,
         <div className="container mx-auto px-4 py-8">
 
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('title')}</h1>
-            <p className="text-gray-600 mb-6">{t('subtitle')}</p>
+            <h1 className="text-[clamp(1.5rem,5vw,2.25rem)] font-bold text-gray-900 dark:text-white mb-2 break-words">{t('title')}</h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">{t('subtitle')}</p>
 
             {/* Búsqueda por nombre/tipo */}
             <SearchBar onSearch={handleSearch} />

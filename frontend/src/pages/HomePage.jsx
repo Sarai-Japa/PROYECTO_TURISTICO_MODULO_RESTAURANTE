@@ -69,10 +69,10 @@ export default function HomePage({ onExplore }) {
         />
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
-          <h2 className="text-5xl md:text-6xl font-bold text-white mb-5 leading-tight drop-shadow-lg">
+          <h2 className="text-[clamp(1.75rem,7vw,3.75rem)] font-bold text-white mb-5 leading-tight drop-shadow-lg break-words">
             {t('hero.title')}
           </h2>
-          <p className="text-xl text-white/90 mb-8 max-w-xl mx-auto drop-shadow">
+          <p className="text-[clamp(1rem,3vw,1.25rem)] text-white/90 mb-8 max-w-xl mx-auto drop-shadow">
             {t('hero.subtitle')}
           </p>
           <button

@@ -60,17 +60,13 @@ export function useReviews(restaurantId, initialSort = 'date', size = 5) {
     }
   }
 
+  // Bug HU17 #4: usa el promedio ya recalculado que devuelve el backend
+  // (transaccional) en vez de aproximarlo en el cliente.
   function addReview(newReview) {
-    setReviews((prev) => [newReview, ...prev]);
+    const { calificacion, ...review } = newReview;
+    setReviews((prev) => [review, ...prev]);
     setMeta((prev) => ({ ...prev, total: prev.total + 1 }));
-    setAvgRating((prev) => {
-      // Recalcular el promedio localmente
-      const prevTotal = meta.total;
-      const prevAvg = prev || 0;
-      const newTotal = prevTotal + 1;
-      const newAvg = ((prevAvg * prevTotal) + newReview.puntuacion) / newTotal;
-      return newAvg;
-    });
+    if (calificacion != null) setAvgRating(parseFloat(calificacion));
   }
 
   return { reviews, avgRating, meta, loading, error, sort, handleSortChange, loadMore, addReview };

@@ -28,27 +28,29 @@ router.get('/', async (req, res) => {
   }
 
   try {
+    // Bug HU17 #1: unaccent() en ambos lados de cada comparación para que
+    // "cafe"/"peña" encuentren "Café"/"Pena" sin importar tildes/ñ.
     const { rows } = await pool.query(
       `SELECT
          id, nombre, tipo_comida, categoria, descripcion, imagen_url,
          ts_rank(
            to_tsvector('spanish',
-             nombre || ' ' || COALESCE(tipo_comida,'') || ' ' || COALESCE(categoria,'')
+             unaccent(nombre || ' ' || COALESCE(tipo_comida,'') || ' ' || COALESCE(categoria,''))
            ),
-           plainto_tsquery('spanish', $2)
+           plainto_tsquery('spanish', unaccent($2))
          ) AS rank
        FROM restaurantes
        WHERE
-         nombre      ILIKE $1
-         OR tipo_comida ILIKE $1
-         OR categoria   ILIKE $1
+         unaccent(nombre)      ILIKE unaccent($1)
+         OR unaccent(tipo_comida) ILIKE unaccent($1)
+         OR unaccent(categoria)   ILIKE unaccent($1)
          OR to_tsvector('spanish',
-              nombre || ' ' || COALESCE(tipo_comida,'') || ' ' || COALESCE(categoria,'')
-            ) @@ plainto_tsquery('spanish', $2)
+              unaccent(nombre || ' ' || COALESCE(tipo_comida,'') || ' ' || COALESCE(categoria,''))
+            ) @@ plainto_tsquery('spanish', unaccent($2))
        ORDER BY
          CASE
-           WHEN nombre      ILIKE $1 THEN 1
-           WHEN tipo_comida ILIKE $1 THEN 2
+           WHEN unaccent(nombre)      ILIKE unaccent($1) THEN 1
+           WHEN unaccent(tipo_comida) ILIKE unaccent($1) THEN 2
            ELSE 3
          END,
          rank DESC
@@ -60,12 +62,14 @@ router.get('/', async (req, res) => {
   } catch (err) {
     console.error('full-text falló, reintentando con ILIKE:', err.message);
 
-    // Fallback a ILIKE puro si plainto_tsquery produce error
+    // Fallback a ILIKE puro (con unaccent) si plainto_tsquery produce error
     try {
       const { rows } = await pool.query(
         `SELECT id, nombre, tipo_comida, categoria, descripcion, imagen_url
          FROM restaurantes
-         WHERE nombre ILIKE $1 OR tipo_comida ILIKE $1 OR categoria ILIKE $1
+         WHERE unaccent(nombre) ILIKE unaccent($1)
+            OR unaccent(tipo_comida) ILIKE unaccent($1)
+            OR unaccent(categoria) ILIKE unaccent($1)
          LIMIT 20`,
         [`%${term}%`]
       );

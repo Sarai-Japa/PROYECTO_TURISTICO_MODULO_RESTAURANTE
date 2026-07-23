@@ -1,4 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "unaccent"; -- HU17 Bug #1: búsqueda insensible a tildes/ñ
 
 -- HU11: autenticación de usuarios
 -- T09: estructura completa: id, email, password_hash, nombre, rol

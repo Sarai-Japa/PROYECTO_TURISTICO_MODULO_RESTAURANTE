@@ -307,8 +307,15 @@ function ReviewForm({ restaurantId, isAuthenticated, onGoLogin, onReviewAdded, t
   );
 }
 
-function ReviewsTab({ restaurantId, isAuthenticated, onGoLogin, t, i18n }) {
+function ReviewsTab({ restaurantId, isAuthenticated, onGoLogin, t, i18n, onAverageUpdated }) {
   const { reviews, avgRating, meta, loading, error, sort, handleSortChange, loadMore, addReview } = useReviews(restaurantId);
+
+  // Bug HU17 #4: propaga el promedio recalculado al componente padre para
+  // que el badge de calificación del header se actualice sin recargar.
+  function handleReviewAdded(newReview) {
+    addReview(newReview);
+    if (newReview.calificacion != null) onAverageUpdated?.(newReview.calificacion);
+  }
 
   return (
     <div>
@@ -316,7 +323,7 @@ function ReviewsTab({ restaurantId, isAuthenticated, onGoLogin, t, i18n }) {
         restaurantId={restaurantId}
         isAuthenticated={isAuthenticated}
         onGoLogin={onGoLogin}
-        onReviewAdded={addReview}
+        onReviewAdded={handleReviewAdded}
         t={t}
       />
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
@@ -524,7 +531,7 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
         </button>
 
         <div className="absolute bottom-0 left-0 right-0 px-6 pb-5">
-          <h1 className="text-white text-3xl md:text-4xl font-bold drop-shadow-lg">{nombre}</h1>
+          <h1 className="text-white text-[clamp(1.375rem,5vw,2.25rem)] font-bold drop-shadow-lg break-words">{nombre}</h1>
           {tipo_comida && <p className="text-white/80 text-sm mt-1">{tipo_comida}</p>}
         </div>
       </div>
@@ -562,7 +569,16 @@ export default function RestaurantDetailPage({ restaurant, onBack, isFavorite = 
       <div className="max-w-4xl mx-auto px-4 py-6">
         {activeTab === 'info'    && <InfoTab    restaurantData={restaurantData} t={t} />}
         {activeTab === 'menu'    && <MenuTab    tipoComida={tipo_comida} />}
-        {activeTab === 'reviews' && <ReviewsTab restaurantId={id} isAuthenticated={isAuthenticated} onGoLogin={onGoLogin} t={t} i18n={i18n} />}
+        {activeTab === 'reviews' && (
+          <ReviewsTab
+            restaurantId={id}
+            isAuthenticated={isAuthenticated}
+            onGoLogin={onGoLogin}
+            t={t}
+            i18n={i18n}
+            onAverageUpdated={(newRating) => setRestaurantData((prev) => ({ ...prev, calificacion: newRating }))}
+          />
+        )}
       </div>
     </div>
   );

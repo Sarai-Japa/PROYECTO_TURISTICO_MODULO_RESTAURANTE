@@ -34,6 +34,7 @@ export function useMapState() {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude, labelKey: 'myLocation' };
         setActiveLocation(loc);
         setSearchCenter({ lat: loc.lat, lng: loc.lng });
+        setGeoDenied(false);
         setGeoSettled(true);
       },
       (err) => {
@@ -58,6 +59,15 @@ export function useMapState() {
     setSearchCenter({ lat, lng });
   }, []);
 
+  // Entrada "normal" al mapa (nav "Mapa"): siempre vuelve a pedir la
+  // ubicación real del usuario, aunque antes se haya usado focusOn()
+  // para centrar en un restaurante específico desde Favoritos.
+  const goToMyLocation = useCallback(() => {
+    requested.current = false;
+    setGeoSettled(false);
+    ensureGeolocation();
+  }, [ensureGeolocation]);
+
   function handleLocationChange(loc) {
     setActiveLocation(loc);
     if (loc) {
@@ -78,6 +88,7 @@ export function useMapState() {
     geoSettled,
     ensureGeolocation,
     focusOn,
+    goToMyLocation,
     handleLocationChange,
     handleMoveEnd,
   };

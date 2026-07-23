@@ -56,9 +56,10 @@ router.post('/register', async (req, res) => {
     );
 
     const user  = rows[0];
-    // T06: JWT incluye id, email y rol en el payload
+    // T06: JWT incluye id, email, rol y nombre en el payload
+    // (bug HU17: reseñas usa req.user.nombre para usuario_nombre — sin esto, POST /reviews fallaba con 500)
     const token = jwt.sign(
-      { id: user.id, email: user.email, rol: user.rol },
+      { id: user.id, email: user.email, rol: user.rol, nombre: user.nombre },
       jwtSecret(),
       { expiresIn: '24h' }
     );
@@ -97,9 +98,9 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
-    // T06: JWT con expiración 24h, incluye rol
+    // T06: JWT con expiración 24h, incluye rol y nombre (ver bug HU17 arriba)
     const token = jwt.sign(
-      { id: user.id, email: user.email, rol: user.rol },
+      { id: user.id, email: user.email, rol: user.rol, nombre: user.nombre },
       jwtSecret(),
       { expiresIn: '24h' }
     );

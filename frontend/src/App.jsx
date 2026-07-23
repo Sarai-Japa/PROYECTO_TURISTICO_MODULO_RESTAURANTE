@@ -1,16 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { useFavorites } from './hooks/useFavorites';
 import { useMapState } from './hooks/useMapState';
 import { useNearbyRestaurants } from './hooks/useNearbyRestaurants';
+// HU17 (QA): HomePage se carga siempre (es la primera pantalla), el resto
+// se separa en chunks propios y se carga solo cuando el usuario navega ahí
+// — reduce el bundle inicial, especialmente Leaflet (Mapa/Detalle).
 import HomePage from './pages/HomePage';
-import RestaurantsPage from './pages/RestaurantsPage';
-import RestaurantDetailPage from './pages/RestaurantDetailPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import FavoritesPage from './pages/FavoritesPage';
-import MapPage from './pages/MapPage';
+const RestaurantsPage      = lazy(() => import('./pages/RestaurantsPage'));
+const RestaurantDetailPage = lazy(() => import('./pages/RestaurantDetailPage'));
+const LoginPage             = lazy(() => import('./pages/LoginPage'));
+const RegisterPage          = lazy(() => import('./pages/RegisterPage'));
+const FavoritesPage         = lazy(() => import('./pages/FavoritesPage'));
+const MapPage                = lazy(() => import('./pages/MapPage'));
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950">
+      <div className="w-8 h-8 border-3 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function getInitialPage() {
   const h = window.location.hash;
@@ -70,8 +81,10 @@ function AppContent() {
   // Mostrar nada mientras se rehidrata el token de localStorage
   if (loading) return null;
 
+  let content;
+
   if (selectedRestaurant) {
-    return (
+    content = (
       <RestaurantDetailPage
         restaurant={selectedRestaurant}
         onBack={() => setSelectedRestaurant(null)}
@@ -81,40 +94,33 @@ function AppContent() {
         isAuthenticated={isAuthenticated}
       />
     );
-  }
-
-  if (page === 'login') {
-    return (
+  } else if (page === 'login') {
+    content = (
       <LoginPage
         onSuccess={() => goTo(returnTo)}
         onGoRegister={() => setPage('register')}
         onBack={() => goTo('home')}
       />
     );
-  }
-
-  if (page === 'register') {
-    return (
+  } else if (page === 'register') {
+    content = (
       <RegisterPage
         onSuccess={() => goTo('restaurants')}
         onGoLogin={() => setPage('login')}
         onBack={() => goTo('home')}
       />
     );
-  }
-
-  // T04: ruta privada — muestra login si no está autenticado
-  if (page === 'favorites') {
-    if (!isAuthenticated) {
-      return (
-        <LoginPage
-          onSuccess={() => goTo('favorites')}
-          onGoRegister={() => setPage('register')}
-          onBack={() => goTo('home')}
-        />
-      );
-    }
-    return (
+  } else if (page === 'favorites' && !isAuthenticated) {
+    // T04: ruta privada — muestra login si no está autenticado
+    content = (
+      <LoginPage
+        onSuccess={() => goTo('favorites')}
+        onGoRegister={() => setPage('register')}
+        onBack={() => goTo('home')}
+      />
+    );
+  } else if (page === 'favorites') {
+    content = (
       <FavoritesPage
         onBack={() => goTo('home')}
         onBackToRestaurants={() => goTo('restaurants')}
@@ -124,24 +130,20 @@ function AppContent() {
         onToggleFavorite={toggleFavorite}
       />
     );
-  }
-
-  if (page === 'restaurants') {
-    return (
+  } else if (page === 'restaurants') {
+    content = (
       <RestaurantsPage
         onBack={() => goTo('home')}
         onSelectRestaurant={setSelectedRestaurant}
         onGoLogin={() => { setReturnTo('restaurants'); setPage('login'); }}
         onGoFavorites={() => requireAuth('favorites')}
-        onGoMap={() => goTo('map')}
+        onGoMap={() => { mapState.goToMyLocation(); goTo('map'); }}
         favoriteIds={favoriteIds}
         onToggleFavorite={toggleFavorite}
       />
     );
-  }
-
-  if (page === 'map') {
-    return (
+  } else if (page === 'map') {
+    content = (
       <MapPage
         onBack={() => goTo('home')}
         onGoRestaurants={() => goTo('restaurants')}
@@ -161,9 +163,11 @@ function AppContent() {
         error={nearby.error}
       />
     );
+  } else {
+    content = <HomePage onExplore={() => goTo('restaurants')} />;
   }
 
-  return <HomePage onExplore={() => goTo('restaurants')} />;
+  return <Suspense fallback={<PageLoader />}>{content}</Suspense>;
 }
 
 export default function App() {

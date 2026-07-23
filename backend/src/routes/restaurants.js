@@ -318,15 +318,19 @@ router.post('/:id/reviews', requireAuth, async (req, res) => {
 
   const cleanComment = xss(comment.trim());
 
+  // Bug HU17 #4: pool.query() suelto no garantiza la misma conexión entre
+  // sentencias — se usa un cliente dedicado (pool.connect()) para que
+  // BEGIN/INSERT/UPDATE/COMMIT corran atómicamente en la misma sesión.
+  const client = await pool.connect();
   try {
     // Verificar que el restaurante exista
-    const restCheck = await pool.query('SELECT id FROM restaurantes WHERE id = $1', [restaurantId]);
+    const restCheck = await client.query('SELECT id FROM restaurantes WHERE id = $1', [restaurantId]);
     if (restCheck.rows.length === 0) {
       return res.status(404).json({ error: 'Restaurante no encontrado' });
     }
 
     // Verificar si ya opinó
-    const userCheck = await pool.query(
+    const userCheck = await client.query(
       'SELECT id FROM reseñas WHERE restaurante_id = $1 AND usuario_id = $2',
       [restaurantId, userId]
     );
@@ -334,10 +338,9 @@ router.post('/:id/reviews', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Ya opinaste sobre este restaurante' });
     }
 
-    // Usar transacción para insertar reseña y actualizar promedio
-    await pool.query('BEGIN');
+    await client.query('BEGIN');
 
-    const insertRes = await pool.query(
+    const insertRes = await client.query(
       `INSERT INTO reseñas (restaurante_id, usuario_id, usuario_nombre, puntuacion, comentario)
        VALUES ($1, $2, $3, $4, $5) RETURNING id, restaurante_id, usuario_id, usuario_nombre, puntuacion, comentario, fecha_creacion`,
       [restaurantId, userId, userName, rating, cleanComment]
@@ -345,23 +348,27 @@ router.post('/:id/reviews', requireAuth, async (req, res) => {
 
     const newReview = insertRes.rows[0];
 
-    // Actualizar calificación promedio del restaurante
-    await pool.query(
-      `UPDATE restaurantes 
+    // Actualizar calificación promedio del restaurante y devolverla ya
+    // recalculada para que el frontend refresque el header sin recargar.
+    const updateRes = await client.query(
+      `UPDATE restaurantes
        SET calificacion = (
          SELECT COALESCE(AVG(puntuacion), 0) FROM reseñas WHERE restaurante_id = $1
        )
-       WHERE id = $1`,
+       WHERE id = $1
+       RETURNING calificacion`,
       [restaurantId]
     );
 
-    await pool.query('COMMIT');
+    await client.query('COMMIT');
 
-    res.status(201).json(newReview);
+    res.status(201).json({ ...newReview, calificacion: updateRes.rows[0].calificacion });
   } catch (err) {
-    await pool.query('ROLLBACK');
+    await client.query('ROLLBACK').catch(() => {});
     console.error('Error al guardar reseña:', err);
     res.status(500).json({ error: 'Error al guardar la reseña' });
+  } finally {
+    client.release();
   }
 });
 
